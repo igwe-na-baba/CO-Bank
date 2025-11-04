@@ -1,0 +1,8 @@
+{
+  "name": "Copy of 02 iCredit Union®",
+  "description": "A top-notch fintech web application for iCredit Union® (iCU), offering seamless international money transfers, KYC support, advanced security, and modern banking features.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
