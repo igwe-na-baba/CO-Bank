@@ -17,6 +17,7 @@ export const LiveTransactionView: React.FC<LiveTransactionViewProps> = ({ transa
             { status: TransactionStatus.CONVERTING, label: 'Processing FX', icon: <ArrowsRightLeftIcon className="w-6 h-6" /> },
             { status: TransactionStatus.AWAITING_AUTHORIZATION, label: 'Pending Authorization', icon: <ShieldCheckIcon className="w-6 h-6" /> },
             { status: TransactionStatus.FLAGGED_AWAITING_CLEARANCE, label: 'Compliance Review', icon: <ScaleIcon className="w-6 h-6" /> },
+            { status: TransactionStatus.CLEARANCE_GRANTED, label: 'Authorization Success', icon: <ShieldCheckIcon className="w-6 h-6" /> },
             { status: TransactionStatus.IN_TRANSIT, label: 'Sent to Network', icon: <GlobeAltIcon className="w-6 h-6" /> },
             { status: TransactionStatus.FUNDS_ARRIVED, label: 'Funds Delivered', icon: <BankIcon className="w-6 h-6" /> },
         ];

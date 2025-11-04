@@ -212,11 +212,16 @@ function AppContent() {
         const timers: number[] = [];
 
         transactions.forEach(tx => {
-            if (tx.requiresAuth || tx.reviewed) return;
+            // A transaction that has been manually reviewed (like after clearing a hold) should not be auto-progressed.
+            if (tx.reviewed) return;
 
             const progressionMap: Partial<Record<TransactionStatus, { next: TransactionStatus, delay: number }>> = {
                 [TransactionStatus.SUBMITTED]: { next: TransactionStatus.CONVERTING, delay: 2000 },
-                [TransactionStatus.CONVERTING]: { next: TransactionStatus.IN_TRANSIT, delay: 3000 },
+                [TransactionStatus.CONVERTING]: { 
+                    // If a transaction requires auth, it must be flagged. Otherwise, it proceeds normally.
+                    next: tx.requiresAuth ? TransactionStatus.FLAGGED_AWAITING_CLEARANCE : TransactionStatus.IN_TRANSIT, 
+                    delay: 3000 
+                },
                 [TransactionStatus.CLEARANCE_GRANTED]: { next: TransactionStatus.IN_TRANSIT, delay: 2500 },
                 [TransactionStatus.IN_TRANSIT]: { next: TransactionStatus.FUNDS_ARRIVED, delay: 5000 },
             };
@@ -336,17 +341,13 @@ function AppContent() {
 
         const totalCost = transactionData.sendAmount + transactionData.fee;
 
-        // For external accounts, we assume the transfer will succeed without a local balance check.
         if (sourceAccount.type !== AccountType.EXTERNAL_LINKED && sourceAccount.balance < totalCost) {
-            console.error("Insufficient funds for transaction");
-            addNotification(
-                NotificationType.TRANSACTION,
-                'Transaction Failed',
-                'Insufficient funds to complete the transfer.',
-                'send'
-            );
+            addNotification(NotificationType.TRANSACTION, 'Transaction Failed', 'Insufficient funds to complete the transfer.', 'send');
             return null;
         }
+        
+        // For demonstration, flag any new transfer to 'Jane Doe' for compliance review.
+        const shouldBeFlagged = transactionData.recipient.id === 'rec_1';
 
         const newTransaction: Transaction = {
             id: `txn_${Date.now()}`,
@@ -357,10 +358,11 @@ function AppContent() {
                 [TransactionStatus.SUBMITTED]: new Date()
             },
             type: 'debit',
+            requiresAuth: shouldBeFlagged,
+            reviewed: false,
         };
         setTransactions(prev => [newTransaction, ...prev]);
 
-        // Only deduct from balance if it's not an external account
         if (sourceAccount.type !== AccountType.EXTERNAL_LINKED) {
             setAccounts(prev => prev.map(acc =>
                 acc.id === transactionData.accountId ? { ...acc, balance: acc.balance - totalCost } : acc
@@ -423,7 +425,6 @@ function AppContent() {
         };
         setRecipients(prev => [newRecipient, ...prev]);
 
-        // Send notifications
         addNotification(NotificationType.SECURITY, 'New Recipient Added', `You added ${newRecipient.fullName} to your recipients list.`, 'recipients');
         
         const {subject, body} = generateNewRecipientEmail(userProfile.name, newRecipient.fullName);
@@ -503,7 +504,6 @@ function AppContent() {
         };
         setLoanApplications(prev => [newApplication, ...prev]);
         
-        // Simulate approval/rejection
         setTimeout(() => {
             const isApproved = Math.random() > 0.5;
             setLoanApplications(prev => prev.map(app => 
@@ -540,7 +540,6 @@ function AppContent() {
     };
 
     const onRevokeDevice = (deviceId: string) => {
-        // FIX: Find the device object first to access its properties for the notification message.
         const deviceToRevoke = trustedDevices.find(d => d.id === deviceId);
         if (deviceToRevoke) {
             setTrustedDevices(prev => prev.filter(d => d.id !== deviceId));
@@ -614,13 +613,13 @@ function AppContent() {
         const newTransaction: Transaction = {
             id: `txn_cheque_${Date.now()}`,
             accountId: details.accountId,
-            recipient: SELF_RECIPIENT, // Depositing to self
+            recipient: SELF_RECIPIENT, 
             sendAmount: details.amount,
             receiveAmount: details.amount,
             fee: 0,
             exchangeRate: 1,
             status: TransactionStatus.SUBMITTED,
-            estimatedArrival: new Date(Date.now() + 86400000 * 2), // 2 days
+            estimatedArrival: new Date(Date.now() + 86400000 * 2), 
             statusTimestamps: { [TransactionStatus.SUBMITTED]: new Date() },
             description: `Mobile Cheque Deposit`,
             type: 'credit',
@@ -631,7 +630,6 @@ function AppContent() {
 
         setTransactions(prev => [newTransaction, ...prev]);
 
-        // Simulate deposit processing
         setTimeout(() => {
              setAccounts(prev => prev.map(acc =>
                 acc.id === details.accountId ? { ...acc, balance: acc.balance + details.amount } : acc
@@ -662,7 +660,7 @@ function AppContent() {
                 recipient: split.recipient,
                 sendAmount: split.amount,
                 receiveAmount: split.amount * exchangeRate,
-                fee: 0, // Assume no fee for splits
+                fee: 0,
                 exchangeRate: exchangeRate,
                 status: TransactionStatus.SUBMITTED,
                 estimatedArrival: new Date(Date.now() + 86400000 * 3),
@@ -685,7 +683,7 @@ function AppContent() {
             type: AccountType.EXTERNAL_LINKED,
             nickname: `${bankName} (${lastFour})`,
             accountNumber: `**** ${lastFour}`,
-            balance: 0, // External accounts don't track balance this way
+            balance: 0,
             features: ['ACH Transfers'],
         };
         setAccounts(prev => [...prev, newAccount]);
@@ -697,14 +695,14 @@ function AppContent() {
             ...NEW_USER_PROFILE_TEMPLATE,
             name: formData.fullName,
             email: formData.email,
-            phone: formData.phone,
+            // FIX: Cast formData.phone to string to resolve type error with sendSmsNotification.
+            phone: formData.phone as string,
         };
         setUserProfile(newUserProfile);
         setAccounts(NEW_USER_ACCOUNTS_TEMPLATE.map(acc => ({...acc, id: `acc_new_${Math.random()}`, fullAccountNumber: String(Math.random()) })));
         setIsNewAccountLogin(true);
         setAuthStatus('loggedIn');
 
-        // FIX: Mapped NEW_USER_ACCOUNTS_TEMPLATE to the shape expected by generateFullWelcomeEmail, which requires a 'number' property instead of 'accountNumber'.
         const accountsForEmail = NEW_USER_ACCOUNTS_TEMPLATE.map(acc => ({
           type: acc.type,
           number: acc.accountNumber,
@@ -717,11 +715,10 @@ function AppContent() {
     useEffect(() => {
         const handleNewUserPostLogin = () => {
             if (isNewAccountLogin) {
-                 // Simulate account provisioning completion
                 setTimeout(() => {
                     setAccounts(prev => prev.map(acc => ({...acc, status: 'Active', accountNumber: `**** ${Math.floor(1000 + Math.random() * 9000)}`})));
                     addNotification(NotificationType.ACCOUNT, 'Accounts Activated', 'Your new accounts are now active and ready to use!', 'accounts');
-                }, 5000); // 5 seconds after login
+                }, 5000); 
                 setIsNewAccountLogin(false);
             }
         };
@@ -745,7 +742,6 @@ function AppContent() {
 
          setAccounts(prev => prev.map(acc => acc.id === data.sourceAccountId ? { ...acc, balance: acc.balance - totalCost } : acc));
          
-// FIX: Added missing properties 'statusTimestamps', 'description', and 'type' to satisfy the Transaction interface.
          const newTransaction: Transaction = {
             id: `wire_${Date.now()}`,
             accountId: data.sourceAccountId,
@@ -774,11 +770,6 @@ function AppContent() {
          return newTransaction;
     };
     
-    // ... rest of App.tsx component ...
-    // Note: The rest of the file content is omitted for brevity as it contains no further changes.
-    // The provided snippet shows the fix within the context of the `onSendWire` function.
-    
-    // (The rest of the component's render logic would be here)
     if (authStatus === 'intro') {
         return <AdvancedFirstPage onComplete={() => setAuthStatus('initializing')} />;
     }
@@ -805,9 +796,233 @@ function AppContent() {
         return <LoggingOut onComplete={() => {}} />;
     }
 
-    // Main logged-in view
+    const renderView = () => {
+        switch (activeView) {
+            case 'dashboard': return <Dashboard 
+                accounts={accounts} 
+                transactions={transactions} 
+                setActiveView={setActiveView} 
+                recipients={recipients}
+                createTransaction={createTransaction}
+                cryptoPortfolioValue={cryptoPortfolioValue}
+                portfolioChange24h={portfolioChange24h}
+                travelPlans={travelPlans}
+                totalNetWorth={totalNetWorth}
+                balanceDisplayMode={balanceDisplayMode}
+                userProfile={userProfile}
+                onOpenSendMoneyFlow={onOpenSendMoneyFlow}
+            />;
+            case 'recipients': return <Recipients recipients={recipients} addRecipient={addRecipient} onUpdateRecipient={onUpdateRecipient} />;
+            case 'history': return <ActivityLog transactions={transactions} onUpdateTransactions={() => {}} onRepeatTransaction={(tx) => onOpenSendMoneyFlow('send', tx)} onAuthorizeTransaction={onAuthorizeTransaction} accounts={accounts} onContactSupport={onContactSupport} />;
+            case 'security': return <Security 
+                advancedTransferLimits={advancedTransferLimits} 
+                onUpdateAdvancedLimits={onUpdateAdvancedLimits}
+                cards={cards}
+                onUpdateCardControls={updateCardControls}
+                verificationLevel={verificationLevel}
+                onVerificationComplete={onVerificationComplete}
+                securitySettings={securitySettings}
+                onUpdateSecuritySettings={onUpdateSecuritySettings}
+                trustedDevices={trustedDevices}
+                onRevokeDevice={onRevokeDevice}
+                onChangePassword={() => setIsChangePasswordModalOpen(true)}
+                transactions={transactions}
+                pushNotificationSettings={pushNotificationSettings}
+                onUpdatePushNotificationSettings={onUpdatePushNotificationSettings}
+                privacySettings={privacySettings}
+                onUpdatePrivacySettings={handleUpdatePrivacySettings}
+                userProfile={userProfile}
+                onUpdateProfilePicture={onUpdateProfilePicture}
+            />;
+            case 'privacy': return <PrivacyCenter settings={privacySettings} onUpdateSettings={handleUpdatePrivacySettings} />;
+            case 'cards': return <CardManagement 
+                cards={cards}
+                virtualCards={virtualCards}
+                onUpdateVirtualCard={updateVirtualCard}
+                cardTransactions={cardTransactions}
+                onUpdateCardControls={updateCardControls}
+                onAddCard={addCard}
+                onAddVirtualCard={addVirtualCard}
+                accountBalance={totalBalance}
+                onAddFunds={(amount, cardLastFour, cardNetwork) => {
+                    const newTx: Transaction = {
+                        id: `dep_${Date.now()}`,
+                        accountId: accounts[0].id,
+                        recipient: SELF_RECIPIENT,
+                        sendAmount: amount,
+                        receiveAmount: amount,
+                        fee: 0,
+                        exchangeRate: 1,
+                        status: TransactionStatus.FUNDS_ARRIVED,
+                        estimatedArrival: new Date(),
+                        statusTimestamps: { [TransactionStatus.SUBMITTED]: new Date(), [TransactionStatus.FUNDS_ARRIVED]: new Date() },
+                        description: `Deposit from ${cardNetwork} **** ${cardLastFour}`,
+                        type: 'credit',
+                    };
+                    setTransactions(prev => [newTx, ...prev]);
+                    setAccounts(prev => prev.map(acc => acc.id === accounts[0].id ? {...acc, balance: acc.balance + amount} : acc));
+                }}
+            />;
+            case 'loans': return <Loans loanApplications={loanApplications} addLoanApplication={addLoanApplication} addNotification={addNotification} />;
+            case 'insurance': return <Insurance addNotification={addNotification} />;
+            case 'support': return <Support />;
+            case 'accounts': return <Accounts accounts={accounts} transactions={transactions} verificationLevel={verificationLevel} onUpdateAccountNickname={(accountId, nickname) => setAccounts(prev => prev.map(acc => acc.id === accountId ? {...acc, nickname} : acc))} />;
+            case 'crypto': return <CryptoDashboard 
+                cryptoAssets={cryptoAssets} 
+                setCryptoAssets={setCryptoAssets}
+                holdings={cryptoHoldings} 
+                checkingAccount={accounts.find(a => a.type === AccountType.CHECKING)}
+                onBuy={(assetId, usdAmount, assetPrice) => {
+                    const sourceAccount = accounts.find(a => a.type === AccountType.CHECKING);
+                    if (!sourceAccount || sourceAccount.balance < usdAmount) return false;
+                    setAccounts(prev => prev.map(a => a.id === sourceAccount.id ? {...a, balance: a.balance - usdAmount} : a));
+                    setCryptoHoldings(prev => {
+                        const existing = prev.find(h => h.assetId === assetId);
+                        const cryptoAmount = usdAmount / assetPrice;
+                        if (existing) {
+                            const totalAmount = existing.amount + cryptoAmount;
+                            const totalCost = (existing.avgBuyPrice * existing.amount) + usdAmount;
+                            return prev.map(h => h.assetId === assetId ? {...h, amount: totalAmount, avgBuyPrice: totalCost / totalAmount} : h);
+                        }
+                        return [...prev, { assetId, amount: cryptoAmount, avgBuyPrice: assetPrice }];
+                    });
+                    return true;
+                }}
+                onSell={(assetId, cryptoAmount, assetPrice) => {
+                    const sourceAccount = accounts.find(a => a.type === AccountType.CHECKING);
+                    const holding = cryptoHoldings.find(h => h.assetId === assetId);
+                    if (!sourceAccount || !holding || holding.amount < cryptoAmount) return false;
+                    
+                    const usdAmount = cryptoAmount * assetPrice;
+                    setAccounts(prev => prev.map(a => a.id === sourceAccount.id ? {...a, balance: a.balance + usdAmount} : a));
+                    setCryptoHoldings(prev => prev.map(h => h.assetId === assetId ? {...h, amount: h.amount - cryptoAmount} : h).filter(h => h.amount > 0.000001));
+                    return true;
+                }}
+            />;
+            case 'services': return <ServicesDashboard 
+                subscriptions={subscriptions} 
+                appleCardDetails={appleCardDetails}
+                appleCardTransactions={appleCardTransactions}
+                onPaySubscription={(subId) => {
+                    const sub = subscriptions.find(s => s.id === subId);
+                    const acc = accounts.find(a => a.balance >= (sub?.amount || 0));
+                    if (!sub || !acc) return false;
+                    setAccounts(prev => prev.map(a => a.id === acc.id ? {...a, balance: a.balance - sub.amount} : a));
+                    setSubscriptions(prev => prev.map(s => s.id === subId ? {...s, isPaid: true} : s));
+                    return true;
+                }}
+                onUpdateSpendingLimits={(limits: SpendingLimit[]) => setAppleCardDetails(prev => ({...prev, spendingLimits: limits}))}
+                onUpdateTransactionCategory={(txId, category) => setAppleCardTransactions(prev => prev.map(tx => tx.id === txId ? {...tx, category} : tx))}
+            />;
+            case 'checkin': return <TravelCheckIn travelPlans={travelPlans} addTravelPlan={(country, startDate, endDate) => {
+                const newPlan: TravelPlan = { id: `travel_${Date.now()}`, country, startDate, endDate, status: startDate > new Date() ? TravelPlanStatus.UPCOMING : TravelPlanStatus.ACTIVE };
+                setTravelPlans(prev => [...prev, newPlan]);
+            }}/>;
+            case 'platform': return <PlatformFeatures settings={platformSettings} onUpdateSettings={(s) => setPlatformSettings(prev => ({...prev, ...s}))} />;
+            case 'tasks': return <Tasks 
+                tasks={tasks} 
+                addTask={(text, dueDate) => setTasks(prev => [...prev, {id: `task_${Date.now()}`, text, completed: false, dueDate}])}
+                toggleTask={(id) => setTasks(prev => prev.map(t => t.id === id ? {...t, completed: !t.completed} : t))}
+                deleteTask={(id) => setTasks(prev => prev.filter(t => t.id !== id))}
+            />;
+            case 'flights': return <Flights 
+                bookings={flightBookings}
+                onBookFlight={(booking, sourceAccountId) => {
+                    const acc = accounts.find(a => a.id === sourceAccountId);
+                    if (!acc || acc.balance < booking.totalPrice) return false;
+                    setAccounts(prev => prev.map(a => a.id === sourceAccountId ? {...a, balance: a.balance - booking.totalPrice} : a));
+                    setFlightBookings(prev => [...prev, { ...booking, id: `booking_${Date.now()}`, bookingDate: new Date(), status: 'Confirmed' }]);
+                    return true;
+                }}
+                accounts={accounts}
+                setActiveView={setActiveView}
+            />;
+            case 'utilities': return <Utilities 
+                bills={utilityBills}
+                billers={utilityBillers}
+                onPayBill={(billId, sourceAccountId) => {
+                    const bill = utilityBills.find(b => b.id === billId);
+                    const acc = accounts.find(a => a.id === sourceAccountId);
+                    if (!bill || !acc || acc.balance < bill.amount) return false;
+                    setAccounts(prev => prev.map(a => a.id === sourceAccountId ? {...a, balance: a.balance - bill.amount} : a));
+                    setUtilityBills(prev => prev.map(b => b.id === billId ? {...b, isPaid: true} : b));
+                    return true;
+                }}
+                accounts={accounts}
+                setActiveView={setActiveView}
+            />;
+            case 'integrations': return <Integrations 
+                linkedServices={linkedServices}
+                onLinkService={(serviceName, identifier) => setLinkedServices(prev => ({...prev, [serviceName]: identifier}))}
+            />;
+            case 'advisor': return <FinancialAdvisor 
+                analysis={financialAnalysis}
+                isAnalyzing={isAnalyzing}
+                analysisError={analysisError}
+                runFinancialAnalysis={async () => {
+                    setIsAnalyzing(true);
+                    setAnalysisError(false);
+                    const result = await getFinancialAnalysis(JSON.stringify({accounts, transactions, cryptoHoldings}));
+                    if (result.isError) {
+                        setAnalysisError(true);
+                    } else {
+                        setFinancialAnalysis(result.analysis);
+                    }
+                    setIsAnalyzing(false);
+                }}
+                setActiveView={setActiveView}
+            />;
+            case 'invest': return <Investments />;
+            case 'atmLocator': return <AtmLocator />;
+            case 'quickteller': return <Quickteller 
+                airtimeProviders={airtimeProviders}
+                purchases={airtimePurchases}
+                accounts={accounts}
+                onPurchase={(providerId, phoneNumber, amount, accountId) => {
+                    const acc = accounts.find(a => a.id === accountId);
+                    if (!acc || acc.balance < amount) return false;
+                    setAccounts(prev => prev.map(a => a.id === accountId ? {...a, balance: a.balance - amount} : a));
+                    setAirtimePurchases(prev => [{id: `air_${Date.now()}`, providerId, phoneNumber, amount, purchaseDate: new Date()}, ...prev]);
+                    return true;
+                }}
+                setActiveView={setActiveView}
+            />;
+            case 'qrScanner': return <QrScanner hapticsEnabled={platformSettings.hapticsEnabled} />;
+            case 'about': return <About />;
+            case 'contact': return <Contact setActiveView={setActiveView} />;
+            case 'wallet': return <DigitalWallet wallet={walletDetails} />;
+            case 'ratings': return <Ratings />;
+            case 'globalAid': return <GlobalAid 
+                donations={donations}
+                accounts={accounts}
+                onDonate={(causeId, amount, sourceAccountId) => {
+                    const acc = accounts.find(a => a.id === sourceAccountId);
+                    if (!acc || acc.balance < amount) return false;
+                    setAccounts(prev => prev.map(a => a.id === sourceAccountId ? {...a, balance: a.balance - amount} : a));
+                    setDonations(prev => [...prev, {id: `don_${Date.now()}`, causeId, amount, date: new Date()}]);
+                    return true;
+                }}
+            />;
+            case 'network': return <GlobalBankingNetwork onOpenWireTransfer={onOpenWireTransfer} setActiveView={setActiveView} />;
+            default: return <Dashboard 
+                accounts={accounts} 
+                transactions={transactions} 
+                setActiveView={setActiveView}
+                recipients={recipients}
+                createTransaction={createTransaction}
+                cryptoPortfolioValue={cryptoPortfolioValue}
+                portfolioChange24h={portfolioChange24h}
+                travelPlans={travelPlans}
+                totalNetWorth={totalNetWorth}
+                balanceDisplayMode={balanceDisplayMode}
+                userProfile={userProfile}
+                onOpenSendMoneyFlow={onOpenSendMoneyFlow}
+            />;
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-slate-100">
+        <div className="min-h-screen bg-slate-900 text-slate-800">
             {showCongratsOverlay && <CongratulationsOverlay />}
             {pushNotification && <PushNotificationToast notification={pushNotification} onClose={() => setPushNotification(null)} />}
             {isResumeModalOpen && savedSession && <ResumeSessionModal session={savedSession} onResume={handleResume} onStartFresh={handleStartFresh} />}
@@ -847,8 +1062,7 @@ function AppContent() {
             <DynamicIslandSimulator transaction={transactions.find(t => t.status !== TransactionStatus.FUNDS_ARRIVED && t.status !== TransactionStatus.FLAGGED_AWAITING_CLEARANCE) || null} />
 
             <div className="flex">
-                {/* Main Content Area */}
-                <main className="flex-1">
+                <main className="flex-1 bg-slate-900">
                     <Header 
                         onMenuToggle={() => setIsMenuOpen(!isMenuOpen)} 
                         isMenuOpen={isMenuOpen}
@@ -865,213 +1079,8 @@ function AppContent() {
                         onOpenSendMoneyFlow={onOpenSendMoneyFlow}
                         onOpenWireTransfer={onOpenWireTransfer}
                     />
-                    <div className="p-4 sm:p-6 lg:p-8">
-                        {activeView === 'dashboard' && <Dashboard 
-                            accounts={accounts} 
-                            transactions={transactions} 
-                            setActiveView={setActiveView} 
-                            recipients={recipients}
-                            createTransaction={createTransaction}
-                            cryptoPortfolioValue={cryptoPortfolioValue}
-                            portfolioChange24h={portfolioChange24h}
-                            travelPlans={travelPlans}
-                            totalNetWorth={totalNetWorth}
-                            balanceDisplayMode={balanceDisplayMode}
-                            userProfile={userProfile}
-                            onOpenSendMoneyFlow={onOpenSendMoneyFlow}
-                        />}
-                        {activeView === 'recipients' && <Recipients recipients={recipients} addRecipient={addRecipient} onUpdateRecipient={onUpdateRecipient} />}
-                        {activeView === 'history' && <ActivityLog transactions={transactions} onUpdateTransactions={() => {}} onRepeatTransaction={(tx) => onOpenSendMoneyFlow('send', tx)} onAuthorizeTransaction={onAuthorizeTransaction} accounts={accounts} onContactSupport={onContactSupport} />}
-                        {activeView === 'security' && <Security 
-                            advancedTransferLimits={advancedTransferLimits} 
-                            onUpdateAdvancedLimits={onUpdateAdvancedLimits}
-                            cards={cards}
-                            onUpdateCardControls={updateCardControls}
-                            verificationLevel={verificationLevel}
-                            onVerificationComplete={onVerificationComplete}
-                            securitySettings={securitySettings}
-                            onUpdateSecuritySettings={onUpdateSecuritySettings}
-                            trustedDevices={trustedDevices}
-                            onRevokeDevice={onRevokeDevice}
-                            onChangePassword={() => setIsChangePasswordModalOpen(true)}
-                            transactions={transactions}
-                            pushNotificationSettings={pushNotificationSettings}
-                            onUpdatePushNotificationSettings={onUpdatePushNotificationSettings}
-                            privacySettings={privacySettings}
-                            onUpdatePrivacySettings={handleUpdatePrivacySettings}
-                            userProfile={userProfile}
-                            onUpdateProfilePicture={onUpdateProfilePicture}
-                        />}
-                         {activeView === 'privacy' && <PrivacyCenter settings={privacySettings} onUpdateSettings={handleUpdatePrivacySettings} />}
-                        {activeView === 'cards' && <CardManagement 
-                            cards={cards}
-                            virtualCards={virtualCards}
-                            onUpdateVirtualCard={updateVirtualCard}
-                            cardTransactions={cardTransactions}
-                            onUpdateCardControls={updateCardControls}
-                            onAddCard={addCard}
-                            onAddVirtualCard={addVirtualCard}
-                            accountBalance={totalBalance}
-                            onAddFunds={(amount, cardLastFour, cardNetwork) => {
-                                const newTx: Transaction = {
-                                    id: `dep_${Date.now()}`,
-                                    accountId: accounts[0].id,
-                                    recipient: SELF_RECIPIENT,
-                                    sendAmount: amount,
-                                    receiveAmount: amount,
-                                    fee: 0,
-                                    exchangeRate: 1,
-                                    status: TransactionStatus.FUNDS_ARRIVED,
-                                    estimatedArrival: new Date(),
-                                    statusTimestamps: { [TransactionStatus.SUBMITTED]: new Date(), [TransactionStatus.FUNDS_ARRIVED]: new Date() },
-                                    description: `Deposit from ${cardNetwork} **** ${cardLastFour}`,
-                                    type: 'credit',
-                                };
-                                setTransactions(prev => [newTx, ...prev]);
-                                setAccounts(prev => prev.map(acc => acc.id === accounts[0].id ? {...acc, balance: acc.balance + amount} : acc));
-                            }}
-                        />}
-                        {activeView === 'loans' && <Loans loanApplications={loanApplications} addLoanApplication={addLoanApplication} addNotification={addNotification} />}
-                        {activeView === 'insurance' && <Insurance addNotification={addNotification} />}
-                        {activeView === 'support' && <Support />}
-                        {activeView === 'accounts' && <Accounts accounts={accounts} transactions={transactions} verificationLevel={verificationLevel} onUpdateAccountNickname={(accountId, nickname) => setAccounts(prev => prev.map(acc => acc.id === accountId ? {...acc, nickname} : acc))} />}
-                        {activeView === 'crypto' && <CryptoDashboard 
-                            cryptoAssets={cryptoAssets} 
-                            setCryptoAssets={setCryptoAssets}
-                            holdings={cryptoHoldings} 
-                            checkingAccount={accounts.find(a => a.type === AccountType.CHECKING)}
-                            onBuy={(assetId, usdAmount, assetPrice) => {
-                                const sourceAccount = accounts.find(a => a.type === AccountType.CHECKING);
-                                if (!sourceAccount || sourceAccount.balance < usdAmount) return false;
-                                setAccounts(prev => prev.map(a => a.id === sourceAccount.id ? {...a, balance: a.balance - usdAmount} : a));
-                                setCryptoHoldings(prev => {
-                                    const existing = prev.find(h => h.assetId === assetId);
-                                    const cryptoAmount = usdAmount / assetPrice;
-                                    if (existing) {
-                                        const totalAmount = existing.amount + cryptoAmount;
-                                        const totalCost = (existing.avgBuyPrice * existing.amount) + usdAmount;
-                                        return prev.map(h => h.assetId === assetId ? {...h, amount: totalAmount, avgBuyPrice: totalCost / totalAmount} : h);
-                                    }
-                                    return [...prev, { assetId, amount: cryptoAmount, avgBuyPrice: assetPrice }];
-                                });
-                                return true;
-                            }}
-                            onSell={(assetId, cryptoAmount, assetPrice) => {
-                                const sourceAccount = accounts.find(a => a.type === AccountType.CHECKING);
-                                const holding = cryptoHoldings.find(h => h.assetId === assetId);
-                                if (!sourceAccount || !holding || holding.amount < cryptoAmount) return false;
-                                
-                                const usdAmount = cryptoAmount * assetPrice;
-                                setAccounts(prev => prev.map(a => a.id === sourceAccount.id ? {...a, balance: a.balance + usdAmount} : a));
-                                setCryptoHoldings(prev => prev.map(h => h.assetId === assetId ? {...h, amount: h.amount - cryptoAmount} : h).filter(h => h.amount > 0.000001));
-                                return true;
-                            }}
-                        />}
-                        {activeView === 'services' && <ServicesDashboard 
-                            subscriptions={subscriptions} 
-                            appleCardDetails={appleCardDetails}
-                            appleCardTransactions={appleCardTransactions}
-                            onPaySubscription={(subId) => {
-                                const sub = subscriptions.find(s => s.id === subId);
-                                const acc = accounts.find(a => a.balance >= (sub?.amount || 0));
-                                if (!sub || !acc) return false;
-                                setAccounts(prev => prev.map(a => a.id === acc.id ? {...a, balance: a.balance - sub.amount} : a));
-                                setSubscriptions(prev => prev.map(s => s.id === subId ? {...s, isPaid: true} : s));
-                                return true;
-                            }}
-                            onUpdateSpendingLimits={(limits: SpendingLimit[]) => setAppleCardDetails(prev => ({...prev, spendingLimits: limits}))}
-                            onUpdateTransactionCategory={(txId, category) => setAppleCardTransactions(prev => prev.map(tx => tx.id === txId ? {...tx, category} : tx))}
-                        />}
-                        {activeView === 'checkin' && <TravelCheckIn travelPlans={travelPlans} addTravelPlan={(country, startDate, endDate) => {
-                            const newPlan: TravelPlan = { id: `travel_${Date.now()}`, country, startDate, endDate, status: startDate > new Date() ? TravelPlanStatus.UPCOMING : TravelPlanStatus.ACTIVE };
-                            setTravelPlans(prev => [...prev, newPlan]);
-                        }}/>}
-                        {activeView === 'platform' && <PlatformFeatures settings={platformSettings} onUpdateSettings={(s) => setPlatformSettings(prev => ({...prev, ...s}))} />}
-                        {activeView === 'tasks' && <Tasks 
-                            tasks={tasks} 
-                            addTask={(text, dueDate) => setTasks(prev => [...prev, {id: `task_${Date.now()}`, text, completed: false, dueDate}])}
-                            toggleTask={(id) => setTasks(prev => prev.map(t => t.id === id ? {...t, completed: !t.completed} : t))}
-                            deleteTask={(id) => setTasks(prev => prev.filter(t => t.id !== id))}
-                        />}
-                        {activeView === 'flights' && <Flights 
-                            bookings={flightBookings}
-                            onBookFlight={(booking, sourceAccountId) => {
-                                const acc = accounts.find(a => a.id === sourceAccountId);
-                                if (!acc || acc.balance < booking.totalPrice) return false;
-                                setAccounts(prev => prev.map(a => a.id === sourceAccountId ? {...a, balance: a.balance - booking.totalPrice} : a));
-                                setFlightBookings(prev => [...prev, { ...booking, id: `booking_${Date.now()}`, bookingDate: new Date(), status: 'Confirmed' }]);
-                                return true;
-                            }}
-                            accounts={accounts}
-                            setActiveView={setActiveView}
-                        />}
-                        {activeView === 'utilities' && <Utilities 
-                            bills={utilityBills}
-                            billers={utilityBillers}
-                            onPayBill={(billId, sourceAccountId) => {
-                                const bill = utilityBills.find(b => b.id === billId);
-                                const acc = accounts.find(a => a.id === sourceAccountId);
-                                if (!bill || !acc || acc.balance < bill.amount) return false;
-                                setAccounts(prev => prev.map(a => a.id === sourceAccountId ? {...a, balance: a.balance - bill.amount} : a));
-                                setUtilityBills(prev => prev.map(b => b.id === billId ? {...b, isPaid: true} : b));
-                                return true;
-                            }}
-                            accounts={accounts}
-                            setActiveView={setActiveView}
-                        />}
-                        {activeView === 'integrations' && <Integrations 
-                            linkedServices={linkedServices}
-                            onLinkService={(serviceName, identifier) => setLinkedServices(prev => ({...prev, [serviceName]: identifier}))}
-                        />}
-                        {activeView === 'advisor' && <FinancialAdvisor 
-                            analysis={financialAnalysis}
-                            isAnalyzing={isAnalyzing}
-                            analysisError={analysisError}
-                            runFinancialAnalysis={async () => {
-                                setIsAnalyzing(true);
-                                setAnalysisError(false);
-                                const result = await getFinancialAnalysis(JSON.stringify({accounts, transactions, cryptoHoldings}));
-                                if (result.isError) {
-                                    setAnalysisError(true);
-                                } else {
-                                    setFinancialAnalysis(result.analysis);
-                                }
-                                setIsAnalyzing(false);
-                            }}
-                            setActiveView={setActiveView}
-                        />}
-                        {activeView === 'invest' && <Investments />}
-                        {activeView === 'atmLocator' && <AtmLocator />}
-                        {activeView === 'quickteller' && <Quickteller 
-                            airtimeProviders={airtimeProviders}
-                            purchases={airtimePurchases}
-                            accounts={accounts}
-                            onPurchase={(providerId, phoneNumber, amount, accountId) => {
-                                const acc = accounts.find(a => a.id === accountId);
-                                if (!acc || acc.balance < amount) return false;
-                                setAccounts(prev => prev.map(a => a.id === accountId ? {...a, balance: a.balance - amount} : a));
-                                setAirtimePurchases(prev => [{id: `air_${Date.now()}`, providerId, phoneNumber, amount, purchaseDate: new Date()}, ...prev]);
-                                return true;
-                            }}
-                            setActiveView={setActiveView}
-                        />}
-                        {activeView === 'qrScanner' && <QrScanner hapticsEnabled={platformSettings.hapticsEnabled} />}
-                        {activeView === 'about' && <About />}
-                        {activeView === 'contact' && <Contact setActiveView={setActiveView} />}
-                        {activeView === 'wallet' && <DigitalWallet wallet={walletDetails} />}
-                        {activeView === 'ratings' && <Ratings />}
-                        {activeView === 'globalAid' && <GlobalAid 
-                            donations={donations}
-                            accounts={accounts}
-                            onDonate={(causeId, amount, sourceAccountId) => {
-                                const acc = accounts.find(a => a.id === sourceAccountId);
-                                if (!acc || acc.balance < amount) return false;
-                                setAccounts(prev => prev.map(a => a.id === sourceAccountId ? {...a, balance: a.balance - amount} : a));
-                                setDonations(prev => [...prev, {id: `don_${Date.now()}`, causeId, amount, date: new Date()}]);
-                                return true;
-                            }}
-                        />}
-                         {activeView === 'network' && <GlobalBankingNetwork onOpenWireTransfer={onOpenWireTransfer} setActiveView={setActiveView} />}
+                    <div className="p-4 sm:p-6 lg:p-8 bg-slate-100 min-h-[calc(100vh-80px)]">
+                        {renderView()}
                     </div>
                      <Footer setActiveView={setActiveView} onOpenSendMoneyFlow={onOpenSendMoneyFlow} openLegalModal={openLegalModal} />
                 </main>

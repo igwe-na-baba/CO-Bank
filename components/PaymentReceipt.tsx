@@ -55,7 +55,7 @@ export const PaymentReceipt: React.FC<PaymentReceiptProps> = ({ transaction, sou
         if (transaction.status === TransactionStatus.FLAGGED_AWAITING_CLEARANCE) {
              const timer = setTimeout(() => {
                 setShowAuthWarning(true);
-            }, 1000);
+            }, 5000); // Increased delay to 5 seconds
             return () => clearTimeout(timer);
         } else {
             setShowAuthWarning(false);

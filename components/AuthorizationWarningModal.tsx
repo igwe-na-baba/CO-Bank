@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SpinnerIcon, ExclamationTriangleIcon } from './Icons';
+import { SpinnerIcon, ExclamationTriangleIcon, XIcon } from './Icons';
 import { CLEARANCE_CODE } from '../constants';
 import { Transaction, Account } from '../types';
 
@@ -46,7 +46,10 @@ export const AuthorizationWarningModal: React.FC<AuthorizationWarningModalProps>
 
     return (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[70] p-4 animate-fade-in">
-            <div className="bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg m-4 border border-yellow-500/50 animate-fade-in-up">
+            <div className="bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg m-4 border border-yellow-500/50 animate-fade-in-up relative">
+                <button onClick={onClose} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-100 rounded-full transition-colors">
+                    <XIcon className="w-6 h-6" />
+                </button>
                 <div className="p-6 text-center">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-500/20 rounded-full mb-4 ring-8 ring-yellow-500/10">
                         <ExclamationTriangleIcon className="w-8 h-8 text-yellow-400"/>
