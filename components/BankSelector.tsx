@@ -2,11 +2,6 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { BANKS_BY_COUNTRY } from '../constants';
 import { getBankIcon, SearchIcon, XIcon } from './Icons';
 
-interface Bank {
-    name: string;
-    domain: string;
-}
-
 interface BankSelectorProps {
     countryCode: string;
     onSelect: (bankName: string) => void;

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Card, CardTransaction, SPENDING_CATEGORIES, VirtualCard } from '../types';
 // FIX: Add missing icons.
-import { ICreditUnionLogo, EyeIcon, EyeSlashIcon, LockClosedIcon, PlusCircleIcon, AppleWalletIcon, VisaIcon, MastercardIcon, ChevronLeftIcon, ChevronRightIcon, ShoppingBagIcon, TransportIcon, FoodDrinkIcon, EntertainmentIcon, GlobeAmericasIcon, XIcon, Cog8ToothIcon, PlusIcon, PencilIcon } from './Icons';
+import { ICreditUnionLogo, EyeIcon, LockClosedIcon, PlusCircleIcon, AppleWalletIcon, VisaIcon, MastercardIcon, ChevronLeftIcon, ChevronRightIcon, ShoppingBagIcon, TransportIcon, FoodDrinkIcon, EntertainmentIcon, GlobeAmericasIcon, Cog8ToothIcon, PlusIcon } from './Icons';
 import { AddFundsModal } from './AddFundsModal';
 import { AddCardModal } from './AddCardModal';
 import { AdvancedCardControlsModal } from './AdvancedCardControlsModal';
@@ -194,7 +194,7 @@ const SpendingSummary: React.FC<{ transactions: CardTransaction[] }> = ({ transa
 };
 
 
-export const CardManagement: React.FC<CardManagementProps> = ({ cards, virtualCards, onUpdateVirtualCard, cardTransactions, onUpdateCardControls, onAddCard, onAddVirtualCard, accountBalance, onAddFunds }) => {
+export const CardManagement: React.FC<CardManagementProps> = ({ cards, virtualCards, onUpdateVirtualCard, cardTransactions, onUpdateCardControls, onAddCard, onAddVirtualCard, accountBalance: _accountBalance, onAddFunds }) => {
     const [currentCardIndex, setCurrentCardIndex] = useState(0);
     const [viewingCard, setViewingCard] = useState<Card | VirtualCard | null>(null);
     const [isAddFundsModalOpen, setIsAddFundsModalOpen] = useState(false);
@@ -211,7 +211,7 @@ export const CardManagement: React.FC<CardManagementProps> = ({ cards, virtualCa
     const currentCardTransactions = useMemo(() => {
         // In a real app, you'd filter transactions by card ID
         return cardTransactions;
-    }, [cardTransactions, currentCard]);
+    }, [cardTransactions]);
 
     return (
         <>
@@ -227,7 +227,7 @@ export const CardManagement: React.FC<CardManagementProps> = ({ cards, virtualCa
                         <div className="relative">
                             <div className="overflow-hidden">
                                 <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentCardIndex * 100}%)`}}>
-                                    {allCards.map((card, index) => (
+                                    {allCards.map((card) => (
                                         <div key={card ? card.id : 'add-card'} className="w-full flex-shrink-0">
                                             {card ? <CardVisual card={card} /> : <AddCardPlaceholder onClick={() => setIsAddCardModalOpen(true)} />}
                                         </div>
@@ -325,8 +325,8 @@ export const CardManagement: React.FC<CardManagementProps> = ({ cards, virtualCa
             {isAddFundsModalOpen && (
                 <AddFundsModal 
                     onClose={() => setIsAddFundsModalOpen(false)}
-                    onAddFunds={(amount, lastFour, network) => {
-                        onAddFunds(amount, lastFour, network);
+                    onAddFunds={async (amount, lastFour, network) => {
+                        await onAddFunds(amount, lastFour, network);
                         setIsAddFundsModalOpen(false);
                     }}
                 />

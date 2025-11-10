@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type, GenerateContentResponse, Chat } from "@google/genai";
+import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { NewsArticle, InsuranceProduct, LoanProduct, SystemUpdate, AccountType, VerificationLevel, AdvisorResponse, Cause } from '../types';
 
 let ai: GoogleGenAI | undefined;
@@ -26,10 +26,8 @@ export const translateWithGemini = async (text: string, targetLanguage: string):
             model: 'gemini-2.5-flash',
             contents: `Translate the following text to ${targetLanguage}. Return only the translated text, without any additional formatting or explanations. Text to translate: "${text}"`,
         });
-        // FIX: Removed optional chaining from response.text as it is not nullable according to Gemini API guidelines.
-        return { translatedText: response.text.trim(), isError: false };
+        return { translatedText: response.text?.trim() ?? '', isError: false };
     } catch (error) {
-        // FIX: Cast error to any to prevent potential type errors with console.error and maintain consistency.
         console.error(`Error translating text to ${targetLanguage}:`, error as any);
         return { translatedText: `(Translation Error) ${text}`, isError: true };
     }

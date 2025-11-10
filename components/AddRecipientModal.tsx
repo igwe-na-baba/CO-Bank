@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Country, Recipient } from '../types';
-import { ALL_COUNTRIES, BANKS_BY_COUNTRY, BANK_ACCOUNT_CONFIG, COUNTRY_CALLING_CODES } from '../constants';
+import { ALL_COUNTRIES, BANK_ACCOUNT_CONFIG, COUNTRY_CALLING_CODES } from '../constants';
 import { getCountryBankingTip, BankingTipResult } from '../services/geminiService';
 import { sendSmsNotification, sendTransactionalEmail, generateOtpEmail, generateOtpSms } from '../services/notificationService';
 import { InfoIcon, SpinnerIcon, ShieldCheckIcon, UserCircleIcon, HomeIcon, BankIcon, CheckCircleIcon, getBankIcon } from './Icons';
@@ -529,7 +529,7 @@ export const AddRecipientModal: React.FC<AddRecipientModalProps> = ({ onClose, o
                       type="text"
                       value={otp}
                       onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
-                      className={`w-48 mx-auto bg-slate-700/50 border border-slate-600 p-3 text-center text-slate-100 text-3xl tracking-[.75em] rounded-md transition-colors focus:bg-slate-700 focus:outline-none ${errors.otp ? 'ring-2 ring-red-500' : 'focus:ring-2 focus:ring-primary'}`}
+                      className={`w-48 mx-auto bg-slate-700/50 border border-slate-600 p-3 text-center text-3xl tracking-[.75em] rounded-md transition-colors focus:bg-slate-700 focus:outline-none ${errors.otp ? 'ring-2 ring-red-500' : 'focus:ring-2 focus:ring-primary'}`}
                       maxLength={6}
                       placeholder="------"
                       autoFocus

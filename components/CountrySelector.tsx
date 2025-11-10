@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Country } from '../types';
 import { ALL_COUNTRIES } from '../constants';
 import { SearchIcon, XIcon } from './Icons';

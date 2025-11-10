@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Account } from '../types';
-import { SpinnerIcon, CameraIcon, CheckCircleIcon, XIcon, ArrowRightIcon } from './Icons';
+import { SpinnerIcon, CameraIcon, CheckCircleIcon } from './Icons';
 
 // Helper to convert file to base64
 const fileToBase64 = (file: File): Promise<string> => {

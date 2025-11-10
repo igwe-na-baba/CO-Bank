@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { SpinnerIcon, CheckCircleIcon, CreditCardIcon, VisaIcon, MastercardIcon } from './Icons';
+import { SpinnerIcon, CheckCircleIcon, VisaIcon, MastercardIcon } from './Icons';
+import { Card } from '../types';
 import { luhnCheck, validateExpiryDate, validateCvc } from '../utils/validation';
 
 interface AddFundsModalProps {

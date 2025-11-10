@@ -1,6 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Transaction, TransactionStatus, Account } from '../types';
-import { TRANSACTION_CATEGORIES } from '../constants';
 import { 
     CheckCircleIcon, 
     ClockIcon, 
@@ -12,8 +11,6 @@ import {
     ArrowDownTrayIcon,
     ArrowPathIcon,
     ClipboardDocumentIcon,
-    TagIcon,
-    DocumentCheckIcon,
     SpinnerIcon,
     GlobeAmericasIcon,
     QuestionMarkCircleIcon,
@@ -68,7 +65,6 @@ const TransactionRow: React.FC<{
     onContactSupport: (transactionId: string) => void;
 }> = ({ transaction, searchTerm, isSelected, onSelect, onDownloadReceipt, isGeneratingPdf, onRepeatTransaction, onResolveHold, onContactSupport }) => {
     const [isExpanded, setIsExpanded] = useState(false);
-    const [copiedId, setCopiedId] = useState(false);
 
     const isCompleted = transaction.status === TransactionStatus.FUNDS_ARRIVED;
     const isFlagged = transaction.status === TransactionStatus.FLAGGED_AWAITING_CLEARANCE;
@@ -92,13 +88,6 @@ const TransactionRow: React.FC<{
         
         const BankLogo = getBankIcon(transaction.recipient.bankName);
         return <BankLogo className="w-6 h-6" />;
-    };
-
-    const handleCopyId = (e: React.MouseEvent) => {
-        e.stopPropagation(); // Prevent the row from toggling when copying
-        navigator.clipboard.writeText(transaction.id);
-        setCopiedId(true);
-        setTimeout(() => setCopiedId(false), 2000);
     };
     
     return (
@@ -187,7 +176,7 @@ const TransactionRow: React.FC<{
 
 export const ActivityLog: React.FC<ActivityLogProps> = ({ 
     transactions, 
-    onUpdateTransactions, 
+    onUpdateTransactions: _onUpdateTransactions, 
     onRepeatTransaction,
     onAuthorizeTransaction,
     accounts,

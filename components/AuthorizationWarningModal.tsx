@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SpinnerIcon, ExclamationTriangleIcon, XIcon, ScaleIcon, ShieldCheckIcon } from './Icons';
+import { SpinnerIcon, XIcon, ScaleIcon, ShieldCheckIcon } from './Icons';
 import { CLEARANCE_CODE } from '../constants';
 import { Transaction, Account } from '../types';
 import { ExternalPaymentGateway } from './ExternalPaymentGateway';

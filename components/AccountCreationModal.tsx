@@ -1,7 +1,7 @@
 
+
 import React, { useState, useEffect } from 'react';
 import {
-    SpinnerIcon,
     UserCircleIcon,
     HomeIcon,
     IdentificationIcon,
@@ -9,7 +9,6 @@ import {
     CheckCircleIcon,
     ICreditUnionLogo,
     DevicePhoneMobileIcon,
-    CameraIcon,
     ArrowRightIcon,
 } from './Icons';
 import { ALL_COUNTRIES } from '../constants';

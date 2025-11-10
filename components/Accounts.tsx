@@ -4,7 +4,7 @@ import { getAccountPerks } from '../services/geminiService';
 // FIX: Renamed ApexBankLogo to ICreditUnionLogo to fix the import error.
 // FIX: Imported the missing `BankIcon` component.
 // FIX: Add missing icons
-import { SpinnerIcon, InfoIcon, ShieldCheckIcon, CreditCardIcon, PiggyBankIcon, BuildingOfficeIcon, BankIcon, DepositIcon, CheckCircleIcon, PencilIcon, getBankIcon, ICreditUnionLogo, ClockIcon, ClipboardDocumentIcon, GlobeAmericasIcon } from './Icons';
+import { SpinnerIcon, ShieldCheckIcon, CreditCardIcon, PiggyBankIcon, BuildingOfficeIcon, BankIcon, DepositIcon, CheckCircleIcon, PencilIcon, getBankIcon, ICreditUnionLogo, ClockIcon, ClipboardDocumentIcon, GlobeAmericasIcon } from './Icons';
 import { USER_PROFILE } from '../constants';
 
 interface AccountsProps {
@@ -112,8 +112,8 @@ const TransactionRow: React.FC<{ transaction: Transaction }> = ({ transaction })
     
     const getTransactionIcon = () => {
         if (isCredit) {
-            return transaction.chequeDetails ?
-                <ClipboardDocumentIcon className="w-6 h-6 text-slate-500" /> :
+            return transaction.chequeDetails ? 
+                <ClipboardDocumentIcon className="w-6 h-6 text-slate-500" /> : 
                 <DepositIcon className="w-6 h-6 text-slate-500" />;
         }
         

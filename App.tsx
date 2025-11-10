@@ -1,14 +1,12 @@
-// FIX: Import `useMemo` and `useRef` from React to resolve 'Cannot find name' errors.
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+// FIX: Import `useRef` from React to resolve 'Cannot find name' errors.
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
 import { SendMoneyFlow } from './components/SendMoneyFlow';
 import { Recipients } from './components/Recipients';
-// FIX: Added missing types to the import from types.ts.
-// FIX: Added CardTransaction to the import list.
-import { Transaction, Recipient, TransactionStatus, Card, CardTransaction, Notification, NotificationType, AdvancedTransferLimits, Country, LoanApplication, LoanApplicationStatus, Account, VerificationLevel, CryptoHolding, CryptoAsset, SubscriptionService, AppleCardDetails, AppleCardTransaction, SpendingLimit, SpendingCategory, TravelPlan, TravelPlanStatus, SecuritySettings, TrustedDevice, UserProfile, PlatformSettings, PlatformTheme, View, Task, TaskCategory, FlightBooking, UtilityBill, UtilityBiller, AdvisorResponse, BalanceDisplayMode, AccountType, AirtimePurchase, PushNotification, PushNotificationSettings, SavedSession, VirtualCard, WalletDetails, Donation, PrivacySettings } from './types';
-// FIX: Added NEW_USER_ACCOUNTS_TEMPLATE to the import from constants.ts to resolve a reference error.
-import { INITIAL_RECIPIENTS, INITIAL_TRANSACTIONS, INITIAL_CARDS, INITIAL_CARD_TRANSACTIONS, INITIAL_ADVANCED_TRANSFER_LIMITS, SELF_RECIPIENT, INITIAL_ACCOUNTS, getInitialCryptoAssets, INITIAL_CRYPTO_HOLDINGS, CRYPTO_TRADE_FEE_PERCENT, INITIAL_SUBSCRIPTIONS, INITIAL_APPLE_CARD_DETAILS, INITIAL_APPLE_CARD_TRANSACTIONS, INITIAL_TRAVEL_PLANS, INITIAL_SECURITY_SETTINGS, INITIAL_TRUSTED_DEVICES, USER_PROFILE, INITIAL_PLATFORM_SETTINGS, THEME_COLORS, INITIAL_TASKS, INITIAL_FLIGHT_BOOKINGS, INITIAL_UTILITY_BILLS, getUtilityBillers, getAirtimeProviders, INITIAL_AIRTIME_PURCHASES, INITIAL_PUSH_SETTINGS, EXCHANGE_RATES, NEW_USER_PROFILE_TEMPLATE, NEW_USER_ACCOUNTS_TEMPLATE, INITIAL_VIRTUAL_CARDS, DOMESTIC_WIRE_FEE, INTERNATIONAL_WIRE_FEE, LEGAL_CONTENT, INITIAL_WALLET_DETAILS, TRANSFER_PURPOSES } from './constants';
+import { Transaction, Recipient, TransactionStatus, Card, CardTransaction, Notification, NotificationType, LoanApplication, LoanApplicationStatus, Account, VerificationLevel, CryptoHolding, CryptoAsset, SubscriptionService, AppleCardDetails, AppleCardTransaction, TravelPlan, TravelPlanStatus, SecuritySettings, TrustedDevice, UserProfile, PlatformSettings, View, Task, FlightBooking, UtilityBill, UtilityBiller, AdvisorResponse, BalanceDisplayMode, AccountType, AirtimePurchase, PushNotification, PushNotificationSettings, SavedSession, VirtualCard, Donation, PrivacySettings } from './types';
+// FIX: Added INITIAL_WALLET_DETAILS to imports to resolve "Cannot find name" error.
+import { INITIAL_RECIPIENTS, INITIAL_TRANSACTIONS, INITIAL_CARDS, INITIAL_CARD_TRANSACTIONS, INITIAL_ADVANCED_TRANSFER_LIMITS, INITIAL_ACCOUNTS, getInitialCryptoAssets, INITIAL_CRYPTO_HOLDINGS, CRYPTO_TRADE_FEE_PERCENT, INITIAL_SUBSCRIPTIONS, INITIAL_APPLE_CARD_DETAILS, INITIAL_APPLE_CARD_TRANSACTIONS, INITIAL_TRAVEL_PLANS, INITIAL_SECURITY_SETTINGS, INITIAL_TRUSTED_DEVICES, USER_PROFILE, INITIAL_PLATFORM_SETTINGS, THEME_COLORS, INITIAL_TASKS, INITIAL_FLIGHT_BOOKINGS, INITIAL_UTILITY_BILLS, getUtilityBillers, getAirtimeProviders, INITIAL_AIRTIME_PURCHASES, INITIAL_PUSH_SETTINGS, EXCHANGE_RATES, NEW_USER_PROFILE_TEMPLATE, NEW_USER_ACCOUNTS_TEMPLATE, INITIAL_VIRTUAL_CARDS, DOMESTIC_WIRE_FEE, INTERNATIONAL_WIRE_FEE, INITIAL_WALLET_DETAILS } from './constants';
 import * as Icons from './components/Icons';
 import { Welcome } from './components/Welcome';
 import { ActivityLog } from './components/ActivityLog';
@@ -23,14 +21,12 @@ import { LogoutConfirmationModal } from './components/LogoutConfirmationModal';
 import { InactivityModal } from './components/InactivityModal';
 import { TravelCheckIn } from './components/TravelCheckIn';
 import { PlatformFeatures } from './components/PlatformFeatures';
-// FIX: Corrected import path casing from 'tasks' to 'Tasks' to match the filename and resolve a module resolution error.
 import { Tasks } from './components/Tasks';
 import { Flights } from './components/Flights';
 import { Utilities } from './components/Utilities';
 import { Integrations } from './components/Integrations';
 import { FinancialAdvisor } from './components/FinancialAdvisor';
 import { LanguageProvider } from './contexts/LanguageContext';
-import { LanguageSelector } from './components/LanguageSelector';
 import * as geminiService from './services/geminiService';
 import * as notificationService from './services/notificationService';
 import { CongratulationsOverlay } from './components/CongratulationsOverlay';
@@ -54,7 +50,6 @@ import { GlobalBankingNetwork } from './components/GlobalBankingNetwork';
 import { LiveBankingAssistant } from './components/LiveBankingAssistant';
 import { ContactSupportModal } from './components/ContactSupportModal';
 import { AccountCreationFlow } from './components/AccountCreationFlow';
-// FIX: Imported the LoggingOut component to resolve a missing component error.
 import { LoggingOut } from './components/LoggingOut';
 import { AdvancedFirstPage } from './components/AdvancedFirstPage';
 import { Investments } from './components/Investments';
@@ -62,8 +57,6 @@ import { Footer } from './components/components/Footer';
 import { PushNotificationToast } from './components/PushNotificationToast';
 import { ResumeSessionModal } from './components/ResumeSessionModal';
 import { Insurance } from './components/Insurance';
-
-const INACTIVITY_TIMEOUT = 300 * 1000; // 5 minutes
 
 const getNextStatusForAutoProgress = (tx: Transaction): { nextStatus: TransactionStatus, fireNotification: boolean } | null => {
     // This transaction should not be auto-progressed if it's already complete or explicitly flagged.
@@ -105,7 +98,6 @@ const AppContent: React.FC = () => {
     // UI State
     const [activeView, setActiveView] = useState<View>('dashboard');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [showLanguageSelector, setShowLanguageSelector] = useState(false);
     const [showSendMoneyFlow, setShowSendMoneyFlow] = useState(false);
     const [sendMoneyFlowInitialTab, setSendMoneyFlowInitialTab] = useState<'send' | 'split' | 'deposit' | undefined>(undefined);
     const [showWireTransfer, setShowWireTransfer] = useState(false);
@@ -133,12 +125,12 @@ const AppContent: React.FC = () => {
     const [loanApplications, setLoanApplications] = useState<LoanApplication[]>([]);
     const [cryptoAssets, setCryptoAssets] = useState<CryptoAsset[]>(() => getInitialCryptoAssets(Icons));
     const [cryptoHoldings, setCryptoHoldings] = useState<CryptoHolding[]>(INITIAL_CRYPTO_HOLDINGS);
-    const [subscriptions, setSubscriptions] = useState<SubscriptionService[]>(INITIAL_SUBSCRIPTIONS);
-    const [appleCardDetails, setAppleCardDetails] = useState<AppleCardDetails>(INITIAL_APPLE_CARD_DETAILS);
-    const [appleCardTransactions, setAppleCardTransactions] = useState<AppleCardTransaction[]>(INITIAL_APPLE_CARD_TRANSACTIONS);
+    const [subscriptions] = useState<SubscriptionService[]>(INITIAL_SUBSCRIPTIONS);
+    const [appleCardDetails] = useState<AppleCardDetails>(INITIAL_APPLE_CARD_DETAILS);
+    const [appleCardTransactions] = useState<AppleCardTransaction[]>(INITIAL_APPLE_CARD_TRANSACTIONS);
     const [travelPlans, setTravelPlans] = useState<TravelPlan[]>(INITIAL_TRAVEL_PLANS);
     const [securitySettings, setSecuritySettings] = useState<SecuritySettings>(INITIAL_SECURITY_SETTINGS);
-    const [trustedDevices, setTrustedDevices] = useState<TrustedDevice[]>(INITIAL_TRUSTED_DEVICES);
+    const [trustedDevices] = useState<TrustedDevice[]>(INITIAL_TRUSTED_DEVICES);
     const [platformSettings, setPlatformSettings] = useState<PlatformSettings>(INITIAL_PLATFORM_SETTINGS);
     const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
     const [flightBookings, setFlightBookings] = useState<FlightBooking[]>(INITIAL_FLIGHT_BOOKINGS);
@@ -147,7 +139,6 @@ const AppContent: React.FC = () => {
     const [airtimeProviders] = useState(() => getAirtimeProviders(Icons));
     const [airtimePurchases, setAirtimePurchases] = useState<AirtimePurchase[]>(INITIAL_AIRTIME_PURCHASES);
     const [pushNotificationSettings, setPushNotificationSettings] = useState<PushNotificationSettings>(INITIAL_PUSH_SETTINGS);
-    // FIX: Initialize privacySettings with nested email and sms objects to prevent runtime errors.
     const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({
         ads: true, sharing: true,
         email: { transactions: true, security: true, promotions: false },
@@ -157,12 +148,10 @@ const AppContent: React.FC = () => {
     const [financialAnalysis, setFinancialAnalysis] = useState<AdvisorResponse | null>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [analysisError, setAnalysisError] = useState(false);
-    const [balanceDisplayMode, setBalanceDisplayMode] = useState<BalanceDisplayMode>('global');
+    const [balanceDisplayMode] = useState<BalanceDisplayMode>('global');
     const [donations, setDonations] = useState<Donation[]>([]);
     const [linkedServices, setLinkedServices] = useState<Record<string, string>>({ 'PayPal': 'randy.m.c@example.com' });
     const [transactionToRepeat, setTransactionToRepeat] = useState<Transaction | null>(null);
-
-    const inactivityTimer = useRef<number>();
     
     useEffect(() => {
         // Apply theme mode
@@ -189,11 +178,11 @@ const AppContent: React.FC = () => {
         setPushNotifications(prev => [newPush, ...prev]);
     }, []);
 
-    const createTransaction = useCallback((data: Omit<Transaction, 'id' | 'status' | 'estimatedArrival' | 'statusTimestamps' | 'type'>): Transaction | null => {
+    const createTransaction = useCallback(async (data: Omit<Transaction, 'id' | 'status' | 'estimatedArrival' | 'statusTimestamps' | 'type'>): Promise<Transaction | null> => {
         const sourceAccount = accounts.find(a => a.id === data.accountId);
         if (!sourceAccount || sourceAccount.balance < (data.sendAmount + data.fee)) {
             console.error("Insufficient funds or account not found.");
-            return null;
+            return Promise.resolve(null);
         }
 
         const newTransaction: Transaction = {
@@ -215,16 +204,16 @@ const AppContent: React.FC = () => {
         notificationService.sendTransactionalEmail(userProfile.email, subject, body);
         addNotification(NotificationType.TRANSACTION, 'Transfer Sent', `Your transfer of ${data.sendAmount.toLocaleString('en-US',{style:'currency', currency:'USD'})} to ${data.recipient.fullName} has been submitted.`);
         
-        return newTransaction;
+        return Promise.resolve(newTransaction);
     }, [accounts, userProfile.name, userProfile.email, userProfile.phone, addNotification]);
     
-    const onSendWire = (data: any) => {
+    const onSendWire = async (data: any): Promise<Transaction | null> => {
         const sourceAccount = accounts.find(a => a.id === data.sourceAccountId);
         const amount = parseFloat(data.amount) || 0;
         const fee = data.transferType === 'international' ? INTERNATIONAL_WIRE_FEE : DOMESTIC_WIRE_FEE;
 
         if (!sourceAccount || sourceAccount.balance < (amount + fee)) {
-            return null;
+            return Promise.resolve(null);
         }
 
         const recipient: Recipient = {
@@ -258,7 +247,7 @@ const AppContent: React.FC = () => {
         setTransactions(prev => [tx, ...prev]);
         setAccounts(prev => prev.map(acc => acc.id === data.sourceAccountId ? { ...acc, balance: acc.balance - (amount + fee) } : acc));
         
-        return tx;
+        return Promise.resolve(tx);
     };
 
     const handleAuthorizeTransaction = useCallback((transactionId: string, method: 'code' | 'fee') => {
@@ -387,7 +376,6 @@ const AppContent: React.FC = () => {
     }, [accounts, transactions, cryptoHoldings]);
     
     const handleCreateAccountSuccess = (formData: any) => {
-        // FIX: Explicitly cast formData.phone to a string or undefined to resolve the 'unknown is not assignable to string' error.
         const newUserProfile: UserProfile = { ...NEW_USER_PROFILE_TEMPLATE, name: formData.fullName, email: formData.email, phone: formData.phone ? String(formData.phone) : undefined };
         const newAccounts = NEW_USER_ACCOUNTS_TEMPLATE.map((acc, i) => ({
             ...acc,
@@ -440,7 +428,7 @@ const AppContent: React.FC = () => {
                 onMarkNotificationsAsRead={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
                 onNotificationClick={(view) => setActiveView(view)}
                 userProfile={userProfile}
-                onOpenLanguageSelector={() => setShowLanguageSelector(true)}
+                onOpenLanguageSelector={() => { /* Removed state */ }}
                 onOpenSendMoneyFlow={(tab) => { setShowSendMoneyFlow(true); setSendMoneyFlowInitialTab(tab); }}
                 onOpenWireTransfer={() => setShowWireTransfer(true)}
             />
@@ -461,8 +449,8 @@ const AppContent: React.FC = () => {
                     {activeView === 'dashboard' && <Dashboard accounts={accounts} transactions={transactions} setActiveView={setActiveView} recipients={recipients} createTransaction={createTransaction} cryptoPortfolioValue={cryptoPortfolioValue} portfolioChange24h={0} travelPlans={travelPlans} totalNetWorth={totalNetWorth} balanceDisplayMode={balanceDisplayMode} userProfile={userProfile} onOpenSendMoneyFlow={(tab) => { setShowSendMoneyFlow(true); setSendMoneyFlowInitialTab(tab); }} />}
                     {activeView === 'recipients' && <Recipients recipients={recipients} addRecipient={() => {}} onUpdateRecipient={() => {}} />}
                     {activeView === 'history' && <ActivityLog transactions={transactions} onUpdateTransactions={() => {}} onRepeatTransaction={(tx) => { setTransactionToRepeat(tx); setShowSendMoneyFlow(true); }} onAuthorizeTransaction={handleAuthorizeTransaction} accounts={accounts} onContactSupport={(txId) => { setContactSupportInitialTxId(txId); setShowContactSupportModal(true); }}/>}
-                    {activeView === 'security' && <Security advancedTransferLimits={INITIAL_ADVANCED_TRANSFER_LIMITS} onUpdateAdvancedLimits={() => {}} cards={cards} onUpdateCardControls={() => {}} verificationLevel={verificationLevel} onVerificationComplete={setVerificationLevel} securitySettings={securitySettings} onUpdateSecuritySettings={setSecuritySettings} trustedDevices={trustedDevices} onRevokeDevice={() => {}} onChangePassword={() => setShowChangePasswordModal(true)} transactions={transactions} pushNotificationSettings={pushNotificationSettings} onUpdatePushNotificationSettings={setPushNotificationSettings} userProfile={userProfile} onUpdateProfilePicture={(url) => setUserProfile(prev => ({...prev, profilePictureUrl: url}))} privacySettings={privacySettings} onUpdatePrivacySettings={(update) => setPrivacySettings(prev => ({...prev, ...update}))} />}
-                    {activeView === 'cards' && <CardManagement cards={cards} virtualCards={virtualCards} onUpdateVirtualCard={(cardId, updates) => setVirtualCards(vcs => vcs.map(vc => vc.id === cardId ? {...vc, ...updates} : vc))} cardTransactions={cardTransactions} onUpdateCardControls={(cardId, updatedControls) => setCards(prev => prev.map(c => c.id === cardId ? { ...c, controls: { ...c.controls, ...updatedControls } } : c))} onAddCard={() => {}} onAddVirtualCard={(data) => {}} accountBalance={mainCheckingAccount?.balance || 0} onAddFunds={async () => {}} />}
+                    {activeView === 'security' && <Security advancedTransferLimits={INITIAL_ADVANCED_TRANSFER_LIMITS} onUpdateAdvancedLimits={() => {}} cards={cards} onUpdateCardControls={() => {}} verificationLevel={verificationLevel} onVerificationComplete={setVerificationLevel} securitySettings={securitySettings} onUpdateSecuritySettings={update => setSecuritySettings(prev => ({ ...prev, ...update }))} trustedDevices={trustedDevices} onRevokeDevice={() => {}} onChangePassword={() => setShowChangePasswordModal(true)} transactions={transactions} pushNotificationSettings={pushNotificationSettings} onUpdatePushNotificationSettings={update => setPushNotificationSettings(prev => ({ ...prev, ...update }))} userProfile={userProfile} onUpdateProfilePicture={(url) => setUserProfile(prev => ({...prev, profilePictureUrl: url}))} privacySettings={privacySettings} onUpdatePrivacySettings={(update) => setPrivacySettings(prev => ({...prev, ...update}))} />}
+                    {activeView === 'cards' && <CardManagement cards={cards} virtualCards={virtualCards} onUpdateVirtualCard={(cardId, updates) => setVirtualCards(vcs => vcs.map(vc => vc.id === cardId ? {...vc, ...updates} : vc))} cardTransactions={cardTransactions} onUpdateCardControls={(cardId, updatedControls) => setCards(prev => prev.map(c => c.id === cardId ? { ...c, controls: { ...c.controls, ...updatedControls } } : c))} onAddCard={() => {}} onAddVirtualCard={() => {}} accountBalance={mainCheckingAccount?.balance || 0} onAddFunds={async () => {}} />}
                     {activeView === 'loans' && <Loans loanApplications={loanApplications} addLoanApplication={(app) => setLoanApplications(prev => [...prev, { ...app, id: `loan_app_${Date.now()}`, status: LoanApplicationStatus.PENDING, submittedDate: new Date() }])} addNotification={addNotification} />}
                     {activeView === 'insurance' && <Insurance addNotification={addNotification} />}
                     {activeView === 'support' && <Support />}
@@ -501,17 +489,17 @@ const AppContent: React.FC = () => {
                     {activeView === 'checkin' && <TravelCheckIn travelPlans={travelPlans} addTravelPlan={(country, startDate, endDate) => setTravelPlans(prev => [...prev, { id: `tp_${Date.now()}`, country, startDate, endDate, status: TravelPlanStatus.UPCOMING }])} />}
                     {activeView === 'platform' && <PlatformFeatures settings={platformSettings} onUpdateSettings={update => setPlatformSettings(prev => ({ ...prev, ...update }))} />}
                     {activeView === 'tasks' && <Tasks tasks={tasks} addTask={(text, dueDate) => setTasks(prev => [...prev, {id: `task_${Date.now()}`, text, completed: false, dueDate}])} toggleTask={taskId => setTasks(prev => prev.map(t => t.id === taskId ? {...t, completed: !t.completed} : t))} deleteTask={taskId => setTasks(prev => prev.filter(t => t.id !== taskId))} />}
-                    {activeView === 'flights' && <Flights bookings={flightBookings} onBookFlight={(booking, sourceAccountId) => {
+                    {activeView === 'flights' && <Flights bookings={flightBookings} onBookFlight={(booking, _sourceAccountId) => {
                         const newBooking: FlightBooking = { ...booking, id: `bk_${Date.now()}`, bookingDate: new Date(), status: 'Confirmed' };
                         setFlightBookings(prev => [...prev, newBooking]);
                         return true;
                     }} accounts={accounts} setActiveView={setActiveView} />}
-                    {activeView === 'utilities' && <Utilities bills={utilityBills} billers={utilityBillers} onPayBill={(billId, sourceAccountId) => { setUtilityBills(prev => prev.map(b => b.id === billId ? {...b, isPaid: true} : b)); return true; }} accounts={accounts} setActiveView={setActiveView} />}
+                    {activeView === 'utilities' && <Utilities bills={utilityBills} billers={utilityBillers} onPayBill={(billId, _sourceAccountId) => { setUtilityBills(prev => prev.map(b => b.id === billId ? {...b, isPaid: true} : b)); return true; }} accounts={accounts} setActiveView={setActiveView} />}
                     {activeView === 'integrations' && <Integrations linkedServices={linkedServices} onLinkService={(service, identifier) => setLinkedServices(prev => ({...prev, [service]: identifier}))} />}
                     {activeView === 'advisor' && <FinancialAdvisor analysis={financialAnalysis} isAnalyzing={isAnalyzing} analysisError={analysisError} runFinancialAnalysis={runFinancialAnalysis} setActiveView={setActiveView} />}
                     {activeView === 'invest' && <Investments />}
                     {activeView === 'atmLocator' && <AtmLocator />}
-                    {activeView === 'quickteller' && <Quickteller airtimeProviders={airtimeProviders} purchases={airtimePurchases} onPurchase={(providerId, phoneNumber, amount, accountId) => { setAirtimePurchases(prev => [...prev, { id: `at_${Date.now()}`, providerId, phoneNumber, amount, purchaseDate: new Date() }]); return true; }} accounts={accounts} setActiveView={setActiveView} />}
+                    {activeView === 'quickteller' && <Quickteller airtimeProviders={airtimeProviders} purchases={airtimePurchases} onPurchase={(providerId, phoneNumber, amount, _accountId) => { setAirtimePurchases(prev => [...prev, { id: `at_${Date.now()}`, providerId, phoneNumber, amount, purchaseDate: new Date() }]); return true; }} accounts={accounts} setActiveView={setActiveView} />}
                     {activeView === 'qrScanner' && <QrScanner hapticsEnabled={platformSettings.hapticsEnabled} />}
                     {activeView === 'privacy' && <PrivacyCenter settings={privacySettings} onUpdateSettings={(update) => setPrivacySettings(prev => ({ ...prev, ...update }))} />}
                     {activeView === 'about' && <About />}
@@ -519,7 +507,7 @@ const AppContent: React.FC = () => {
                     {activeView === 'wallet' && <DigitalWallet wallet={INITIAL_WALLET_DETAILS} />}
                     {activeView === 'ratings' && <Ratings />}
                     {activeView === 'globalAid' && <GlobalAid donations={donations} accounts={accounts} onDonate={(causeId, amount, accountId) => { setDonations(prev => [...prev, { id: `don_${Date.now()}`, causeId, amount, date: new Date() }]); setAccounts(prev => prev.map(a => a.id === accountId ? {...a, balance: a.balance - amount} : a)); return true; }} />}
-                    {activeView === 'network' && <GlobalBankingNetwork onOpenWireTransfer={(data) => { setWireTransferInitialData(data); setShowWireTransfer(true); }} setActiveView={setActiveView} />}
+                    {activeView === 'network' && <GlobalBankingNetwork onOpenWireTransfer={(_data) => { setWireTransferInitialData(_data); setShowWireTransfer(true); }} setActiveView={setActiveView} />}
                 </div>
             </main>
             <Footer setActiveView={setActiveView} onOpenSendMoneyFlow={(tab) => { setShowSendMoneyFlow(true); setSendMoneyFlowInitialTab(tab); }} openLegalModal={(title, content) => { setLegalModalContent({ title, content }); setShowLegalModal(true); }} />
@@ -557,7 +545,7 @@ const AppContent: React.FC = () => {
                     addNotification(NotificationType.SUPPORT, 'Recipient Not Found', `Could not find a saved recipient named "${recipientName}". Please add them first.`);
                 }
             }} />
-            {showContactSupportModal && <ContactSupportModal onClose={() => setShowContactSupportModal(false)} onSubmit={async (data) => {
+            {showContactSupportModal && <ContactSupportModal onClose={() => setShowContactSupportModal(false)} onSubmit={async () => {
                 addNotification(NotificationType.SUPPORT, "Support Ticket Created", "We've received your request and will get back to you shortly.");
             }} transactions={transactions} initialTransactionId={contactSupportInitialTxId} />}
             {showLegalModal && <LegalModal title={legalModalContent.title} content={legalModalContent.content} onClose={() => setShowLegalModal(false)} />}
