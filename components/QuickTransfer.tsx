@@ -6,7 +6,7 @@ import { SpinnerIcon, CheckCircleIcon, getBankIcon, UserCircleIcon, SendIcon } f
 interface QuickTransferProps {
     accounts: Account[];
     recipients: Recipient[];
-    createTransaction: (transaction: Omit<Transaction, 'id' | 'status' | 'estimatedArrival' | 'statusTimestamps' | 'type'>) => Transaction | null;
+    createTransaction: (transaction: Omit<Transaction, 'id' | 'status' | 'estimatedArrival' | 'statusTimestamps' | 'type'>) => Promise<Transaction | null>;
 }
 
 export const QuickTransfer: React.FC<QuickTransferProps> = ({ accounts, recipients, createTransaction }) => {
@@ -65,15 +65,15 @@ export const QuickTransfer: React.FC<QuickTransferProps> = ({ accounts, recipien
         }
     };
 
-    const handleSend = () => {
+    const handleSend = async () => {
         if (isAmountInvalid || !selectedRecipient || !sourceAccount) return;
 
         setStatus('sending');
         setError('');
 
         // Simulate network delay
-        setTimeout(() => {
-            const newTransaction = createTransaction({
+        setTimeout(async () => {
+            const newTransaction = await createTransaction({
                 accountId: sourceAccount.id,
                 recipient: selectedRecipient,
                 sendAmount: numericAmount,

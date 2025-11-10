@@ -4,9 +4,10 @@ import { CheckCircleIcon, SendIcon, ArrowsRightLeftIcon, ShieldCheckIcon, ScaleI
 
 interface TransactionTrackerProps {
   transaction: Transaction;
+  theme?: 'light' | 'dark';
 }
 
-export const TransactionTracker: React.FC<TransactionTrackerProps> = ({ transaction }) => {
+export const TransactionTracker: React.FC<TransactionTrackerProps> = ({ transaction, theme = 'dark' }) => {
   const { status, statusTimestamps } = transaction;
 
   const allPossibleSteps = [
@@ -26,6 +27,23 @@ export const TransactionTracker: React.FC<TransactionTrackerProps> = ({ transact
 
   const currentStepIndex = steps.findIndex(s => s.status === status);
   const isComplete = status === TransactionStatus.FUNDS_ARRIVED;
+
+  const styles = {
+    light: {
+      stepBgDefault: 'bg-slate-200 text-slate-500',
+      stepTextActive: 'text-slate-800',
+      stepTextInactive: 'text-slate-600',
+      timestamp: 'text-slate-500',
+      line: 'bg-slate-300',
+    },
+    dark: {
+      stepBgDefault: 'bg-slate-700 text-slate-400',
+      stepTextActive: 'text-slate-200',
+      stepTextInactive: 'text-slate-500',
+      timestamp: 'text-slate-400',
+      line: 'bg-slate-600',
+    }
+  }[theme];
 
   return (
     <div className="w-full">
@@ -47,7 +65,7 @@ export const TransactionTracker: React.FC<TransactionTrackerProps> = ({ transact
                       ? 'bg-yellow-500 text-white animate-pulse'
                       : isCurrentStep
                       ? 'bg-primary text-white animate-pulse'
-                      : 'bg-slate-700 text-slate-400'
+                      : styles.stepBgDefault
                   }`}
                 >
                   {isStepCompleted ? (
@@ -60,13 +78,13 @@ export const TransactionTracker: React.FC<TransactionTrackerProps> = ({ transact
                 </div>
                 <p
                   className={`mt-2 text-xs text-center font-medium w-24 ${
-                    isStepCompleted || isCurrentStep ? 'text-slate-200' : 'text-slate-500'
+                    isStepCompleted || isCurrentStep ? styles.stepTextActive : styles.stepTextInactive
                   }`}
                 >
                   {step.label}
                 </p>
                 {timestamp && (
-                  <div className="text-xs text-slate-400 mt-1 text-center">
+                  <div className={`text-xs ${styles.timestamp} mt-1 text-center`}>
                     <p>{timestamp.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
                     <p>{timestamp.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
                   </div>
@@ -75,7 +93,7 @@ export const TransactionTracker: React.FC<TransactionTrackerProps> = ({ transact
               {index < steps.length - 1 && (
                 <div
                   className={`flex-1 h-1 mx-2 mt-5 transition-colors duration-300 ${
-                    isStepCompleted ? 'bg-green-500' : 'bg-slate-600'
+                    isStepCompleted ? 'bg-green-500' : styles.line
                   }`}
                 ></div>
               )}

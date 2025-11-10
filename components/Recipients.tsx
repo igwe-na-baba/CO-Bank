@@ -73,7 +73,7 @@ const RecipientCard: React.FC<{ recipient: Recipient; onEdit: () => void }> = ({
                         <div>
                             <p className="font-bold text-slate-800">{recipient.nickname || recipient.fullName}</p>
                             <div className="flex items-center space-x-2 text-sm text-slate-500">
-                                <img src={`https://flagcdn.com/w20/${recipient.country.code.toLowerCase()}.png`} alt={recipient.country.name} className="w-5 rounded-sm" />
+                                <img src={`https://flagsapi.com/${recipient.country.code}/shiny/24.png`} alt={recipient.country.name} className="w-5 rounded-sm" />
                                 <span>{recipient.recipientType === 'service' ? recipient.serviceName : recipient.bankName} &bull; {recipient.accountNumber}</span>
                             </div>
                         </div>

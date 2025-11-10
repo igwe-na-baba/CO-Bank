@@ -142,6 +142,70 @@
         from { opacity: 0; transform: translateY(5px); }
         to { opacity: 1; transform: translateY(0); }
       }
+       /* Chat Assistant Styles */
+      @keyframes pulse-ring {
+        0% { box-shadow: 0 0 0 0 rgba(0, 82, 255, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(0, 82, 255, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 82, 255, 0); }
+      }
+      .chat-pulse {
+        animation: pulse-ring 2s infinite;
+      }
+
+      .chat-messages::-webkit-scrollbar {
+        width: 6px;
+      }
+      .chat-messages::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .chat-messages::-webkit-scrollbar-thumb {
+        background-color: rgb(var(--color-primary-700));
+        border-radius: 3px;
+      }
+
+      /* --- Payment Verified Stamp --- */
+      .stamp {
+        font-family: 'Courier New', Courier, monospace;
+        text-transform: uppercase;
+        font-weight: bold;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        transform: rotate(-15deg);
+        pointer-events: none;
+        user-select: none;
+      }
+      .stamp-animated {
+        animation: stamp-animation 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.5s forwards;
+        transform: scale(3) rotate(-30deg);
+        opacity: 0;
+      }
+      @keyframes stamp-animation {
+          0% { transform: scale(3) rotate(-30deg); opacity: 0; }
+          60% { transform: scale(0.9) rotate(-12deg); opacity: 0.85; }
+          100% { transform: scale(1) rotate(-15deg); opacity: 0.75; }
+      }
+      .stamp-outer {
+        border-width: 7px;
+        padding: 5px;
+      }
+      .stamp-inner {
+        border-width: 3px;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.2;
+      }
+      .stamp-red {
+        color: #d9534f;
+        border-color: #d9534f;
+      }
     </style>
     <script>
       tailwind.config = {
@@ -176,7 +240,7 @@
               'breathing': 'breathing 4s ease-in-out infinite',
               'slide-in-down': 'slide-in-down 0.3s ease-out forwards',
               'slide-out-up': 'slide-out-up 0.3s ease-in forwards',
-              'ken-burns': 'ken-burns 80s ease-in-out infinite',
+              'ken-burns': 'ken-burns 40s ease-in-out infinite',
               'breathing-dot': 'breathing-dot 2s ease-in-out infinite',
               'grid-pan': 'grid-pan 40s linear infinite',
               'card-zoom': 'card-background-zoom 40s ease-in-out infinite',
@@ -223,9 +287,9 @@
                 '100%': { opacity: '0', transform: 'translateY(-20px)' },
               },
               'ken-burns': {
-                  '0%': { backgroundSize: '100%', backgroundPosition: 'center' },
-                  '50%': { backgroundSize: '105%', backgroundPosition: 'top left' },
-                  '100%': { backgroundSize: '100%', backgroundPosition: 'center' },
+                  '0%': { transform: 'scale(1.05) translate(0,0)' },
+                  '50%': { transform: 'scale(1.15) translate(2%, -2%)' },
+                  '100%': { transform: 'scale(1.05) translate(0,0)' },
               },
               'breathing-dot': {
                 '0%, 100%': {
@@ -251,19 +315,19 @@
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.22.0"
-  }
-}
-</script>
 </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.3.1",
+        "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+        "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+        "@google/genai": "https://esm.sh/@google/genai@0.14.0"
+      }
+    }
+    </script>
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>

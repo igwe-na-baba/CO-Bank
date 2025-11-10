@@ -16,7 +16,7 @@ interface CardManagementProps {
     onAddCard: (cardData: Omit<Card, 'id' | 'controls'>) => void;
     onAddVirtualCard: (data: { nickname: string; linkedCardId: string; spendingLimit: number | null }) => void;
     accountBalance: number;
-    onAddFunds: (amount: number, cardLastFour: string, cardNetwork: 'Visa' | 'Mastercard') => void;
+    onAddFunds: (amount: number, cardLastFour: string, cardNetwork: 'Visa' | 'Mastercard') => Promise<void>;
 }
 
 const getCategoryIcon = (category: string) => {

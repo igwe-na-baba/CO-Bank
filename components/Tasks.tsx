@@ -1,3 +1,6 @@
+// FIX: Moved the Tasks component implementation here from 'tasks.tsx' (lowercase 't')
+// to resolve a file path casing conflict which can cause issues in certain build environments.
+// The standard convention is to use PascalCase for component filenames.
 import React, { useState, useMemo } from 'react';
 import { Task } from '../types';
 import { PlusCircleIcon, CalendarDaysIcon, CheckCircleIcon, ClipboardDocumentIcon, XIcon, AnimatedCheckCircleIcon } from './Icons';

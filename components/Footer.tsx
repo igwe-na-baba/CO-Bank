@@ -52,7 +52,7 @@ export const Footer: React.FC<FooterProps> = ({ setActiveView, onOpenSendMoneyFl
                         playsInline
                         className="absolute z-0 w-auto min-w-full min-h-full max-w-none opacity-20"
                     >
-                        <source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-globe-with-flowing-lines-of-data-42217-large.mp4" type="video/mp4" />
+                        <source src="https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-a-connected-globe-4560 connected-globe-4560-large.mp4" type="video/mp4" />
                     </video>
                     {/* Overlay */}
                     <div className="absolute inset-0 bg-slate-900/60 z-10"></div>

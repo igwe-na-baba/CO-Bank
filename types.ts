@@ -138,6 +138,7 @@ export interface Transaction {
   };
   description: string;
   type: 'debit' | 'credit';
+  // FIX: Made 'purpose' optional to align with its usage in `createTransaction`.
   purpose?: string;
   requiresAuth?: boolean;
   chequeDetails?: {

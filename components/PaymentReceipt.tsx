@@ -52,10 +52,10 @@ export const PaymentReceipt: React.FC<PaymentReceiptProps> = ({ transaction, sou
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
     useEffect(() => {
-        if (transaction.status === TransactionStatus.FLAGGED_AWAITING_CLEARANCE) {
+        if (transaction.status === TransactionStatus.IN_TRANSIT) {
              const timer = setTimeout(() => {
                 setShowAuthWarning(true);
-            }, 5000); // Increased delay to 5 seconds
+            }, 2000);
             return () => clearTimeout(timer);
         } else {
             setShowAuthWarning(false);
@@ -109,9 +109,6 @@ export const PaymentReceipt: React.FC<PaymentReceiptProps> = ({ transaction, sou
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,82,255,0.3),transparent_40%)]"></div>
             </div>
             <div className="relative z-10 text-left space-y-6 animate-fade-in-up">
-                {isCompleted && (
-                    <img src="https://i.postimg.cc/PqYvK1Y9/Qp-Yg-Sg-U.jpg" alt="Paid Stamp" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-auto opacity-20 transform -rotate-12 pointer-events-none" />
-                )}
                 
                 {/* Header */}
                 <div className="text-center border-b-2 border-slate-700 pb-4">
@@ -176,9 +173,16 @@ export const PaymentReceipt: React.FC<PaymentReceiptProps> = ({ transaction, sou
                                 <img src={`https://quickchart.io/qr?text=iCU-Txn-${transaction.id}&size=100&ecLevel=H&margin=1`} alt="Transaction QR Code" className="w-24 h-24 rounded-lg bg-white p-1 border border-slate-700" />
                                 <p className="text-xs text-slate-500 mt-1">Scan for details</p>
                              </div>
-                             <div className="text-center relative w-48 h-24">
-                                <img src="https://i.postimg.cc/y8p7zZfQ/signature-placeholder.png" alt="Signature" className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-auto mix-blend-screen opacity-70" />
-                                <p className="absolute bottom-0 w-full text-xs text-slate-500 border-t-2 border-slate-600 mt-1 pt-1">Authorized Signatory</p>
+                             <div className="relative w-48 h-24 flex items-center justify-center">
+                                {isCompleted && (
+                                    <div className="stamp stamp-animated stamp-red" style={{width: 140, height: 140}}>
+                                        <div className="stamp-inner">
+                                            <div className="text-lg leading-tight">Verified</div>
+                                            <div className="text-[10px] my-1">{submissionDate.toLocaleDateString()}</div>
+                                            <div className="text-[10px] tracking-normal">iCredit Union®</div>
+                                        </div>
+                                    </div>
+                                )}
                              </div>
                         </div>
                     </Section>

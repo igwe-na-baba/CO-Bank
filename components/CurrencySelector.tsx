@@ -50,7 +50,7 @@ export const CurrencySelector: React.FC<CurrencySelectorProps> = ({ selectedCurr
                 {selectedCurrencyInfo ? (
                     <>
                         <img
-                            src={`https://flagcdn.com/w40/${selectedCurrencyInfo.countryCode.toLowerCase()}.png`}
+                            src={`https://flagsapi.com/${selectedCurrencyInfo.countryCode}/shiny/32.png`}
                             alt={`${selectedCurrencyInfo.name} flag`}
                             className="w-6 h-auto rounded-sm shadow-sm animate-flag-pop"
                         />
@@ -95,7 +95,7 @@ export const CurrencySelector: React.FC<CurrencySelectorProps> = ({ selectedCurr
                                         onClick={() => handleSelect(c.code)}
                                         className="w-full flex items-center space-x-4 p-4 text-slate-800 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 text-left"
                                     >
-                                        <img src={`https://flagcdn.com/w40/${c.countryCode.toLowerCase()}.png`} alt={c.name} className="w-8 rounded-md shadow-sm" />
+                                        <img src={`https://flagsapi.com/${c.countryCode}/shiny/32.png`} alt={c.name} className="w-8 rounded-md shadow-sm" />
                                         <div>
                                             <p className="font-semibold">{c.code} <span className="text-lg">{c.symbol}</span></p>
                                             <p className="text-sm text-slate-500 dark:text-slate-400">{c.name}</p>

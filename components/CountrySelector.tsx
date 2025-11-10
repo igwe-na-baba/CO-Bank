@@ -45,7 +45,7 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({ selectedCountr
                 className={className}
             >
                 <div className="flex items-center space-x-3">
-                    <img src={`https://flagcdn.com/w40/${selectedCountry.code.toLowerCase()}.png`} alt={selectedCountry.name} className="w-6 rounded-sm shadow-sm" />
+                    <img src={`https://flagsapi.com/${selectedCountry.code}/shiny/32.png`} alt={selectedCountry.name} className="w-6 rounded-sm shadow-sm" />
                     <span className="font-semibold">{selectedCountry.name}</span>
                 </div>
                 <span className="text-slate-400">▼</span>
@@ -84,7 +84,7 @@ export const CountrySelector: React.FC<CountrySelectorProps> = ({ selectedCountr
                                         onClick={() => handleSelect(c)}
                                         className="w-full flex items-center space-x-4 p-4 text-slate-800 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 text-left"
                                     >
-                                        <img src={`https://flagcdn.com/w40/${c.code.toLowerCase()}.png`} alt={c.name} className="w-8 rounded-md shadow-sm" />
+                                        <img src={`https://flagsapi.com/${c.code}/shiny/32.png`} alt={c.name} className="w-8 rounded-md shadow-sm" />
                                         <div>
                                             <p className="font-semibold">{c.name}</p>
                                             <p className="text-sm text-slate-500 dark:text-slate-400">{c.code} &bull; {c.currency}</p>

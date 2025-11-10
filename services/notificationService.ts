@@ -40,13 +40,18 @@ const generateEmailWrapper = (subject: string, content: string): string => `
 // NOTIFICATION SENDING SIMULATIONS
 // ===================================================================================
 
+interface NotificationResult {
+    success: boolean;
+    error?: string;
+}
+
 /**
  * Simulates sending a push notification to a group of customers via a service like FCM.
  * @param customerGroup - The group of customers to target.
  * @param title - The title of the push notification.
  * @param body - The body content of the push notification.
  */
-export const sendPushNotification = async (customerGroup: CustomerGroup, title: string, body: string) => {
+export const sendPushNotification = async (customerGroup: CustomerGroup, title: string, body: string): Promise<NotificationResult> => {
   // Simulate FCM API call
   const messageId = `projects/icu-prod/messages/${Date.now()}-${Math.random().toString(36).substring(2)}`;
 
@@ -74,6 +79,7 @@ MESSAGE_ID:   ${messageId}
 (This is a simulated Push Notification.)
 ================================================================
   `);
+  return { success: true };
 };
 
 /**
@@ -82,7 +88,7 @@ MESSAGE_ID:   ${messageId}
  * @param subject - The subject line of the email.
  * @param body - The HTML body of the email.
  */
-export const sendTransactionalEmail = async (recipientEmail: string, subject: string, body: string) => {
+export const sendTransactionalEmail = async (recipientEmail: string, subject: string, body: string): Promise<NotificationResult> => {
   const mailOptions = {
     from: '"iCredit Union®" <noreply@icreditunion.com>',
     to: recipientEmail,
@@ -115,6 +121,7 @@ SMTP RESPONSE: 250 OK: queued as ${Math.random().toString(36).substring(2).toUpp
 (This is a simulated email.)
 ================================================================================
   `);
+  return { success: true };
 };
 
 
@@ -123,7 +130,7 @@ SMTP RESPONSE: 250 OK: queued as ${Math.random().toString(36).substring(2).toUpp
  * @param phoneNumber - The customer's phone number.
  * @param message - The text message content.
  */
-export const sendSmsNotification = async (phoneNumber: string, message: string) => {
+export const sendSmsNotification = async (phoneNumber: string, message: string): Promise<NotificationResult> => {
   const accountSid = 'AC_SIMULATED_ACCOUNT_SID';
   const messageSid = `SM${[...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')}`;
 
@@ -148,6 +155,7 @@ ${message}
 (This is a simulated SMS.)
 ================================================================
   `);
+  return { success: true };
 };
 
 

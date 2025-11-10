@@ -53,19 +53,17 @@ const AnimatedICreditUnionLogo = () => (
 
 
 export const AdvancedFirstPage: React.FC<AdvancedFirstPageProps> = ({ onComplete }) => {
-    const bgRef = useRef<HTMLDivElement>(null);
     const gridRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const handleMouseMove = (event: MouseEvent) => {
-            if (bgRef.current && gridRef.current) {
+            if (gridRef.current) {
                 const { clientX, clientY } = event;
                 const { innerWidth, innerHeight } = window;
                 const offsetX = (clientX / innerWidth - 0.5) * 2; // range from -1 to 1
                 const offsetY = (clientY / innerHeight - 0.5) * 2; // range from -1 to 1
 
-                // Apply different translation factors for a parallax depth effect
-                bgRef.current.style.transform = `translateX(${offsetX * 10}px) translateY(${offsetY * 8}px)`;
+                // Apply parallax depth effect only to the grid
                 gridRef.current.style.transform = `translateX(${offsetX * 20}px) translateY(${offsetY * 15}px)`;
             }
         };
@@ -78,18 +76,12 @@ export const AdvancedFirstPage: React.FC<AdvancedFirstPageProps> = ({ onComplete
 
     return (
         <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center overflow-hidden relative">
-            {/* Background Video Layer */}
-            <div ref={bgRef} className="absolute inset-[-20px] z-0 transition-transform duration-300 ease-out">
-                 <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="absolute inset-0 w-full h-full object-cover"
-                >
-                    <source src="https://assets.mixkit.co/videos/preview/mixkit-a-futuristic-business-environment-with-holograms-44812-large.mp4" type="video/mp4" />
-                </video>
-            </div>
+            {/* Background Image with Ken Burns effect */}
+            <img
+                src="https://images.unsplash.com/photo-1533929736458-ca588d08c8be?q=80&w=2940&auto=format&fit=crop"
+                alt="London street at night with light trails, representing global finance"
+                className="absolute inset-0 w-full h-full object-cover z-0 animate-ken-burns"
+            />
             
             {/* Animated Grid Overlay */}
             <div 

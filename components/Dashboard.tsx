@@ -62,7 +62,7 @@ interface DashboardProps {
   transactions: Transaction[];
   setActiveView: (view: any) => void;
   recipients: Recipient[];
-  createTransaction: (transaction: Omit<Transaction, 'id' | 'status' | 'estimatedArrival' | 'statusTimestamps' | 'type'>) => Transaction | null;
+  createTransaction: (transaction: Omit<Transaction, 'id' | 'status' | 'estimatedArrival' | 'statusTimestamps' | 'type'>) => Promise<Transaction | null>;
   cryptoPortfolioValue: number;
   portfolioChange24h: number;
   travelPlans: TravelPlan[];
@@ -164,7 +164,7 @@ const TransactionRow: React.FC<{ transaction: Transaction }> = ({ transaction })
                     <p className="text-sm text-slate-400">{transaction.description}</p>
                 ) : (
                     <div className="flex items-center space-x-1.5">
-                        <img src={`https://flagcdn.com/w20/${transaction.recipient.country.code.toLowerCase()}.png`} alt={transaction.recipient.country.name} className="w-4 h-auto rounded-sm" />
+                        <img src={`https://flagsapi.com/${transaction.recipient.country.code}/shiny/24.png`} alt={transaction.recipient.country.name} className="w-5 h-auto rounded-sm" />
                         <p className="text-sm text-slate-400">{transaction.recipient.bankName}</p>
                     </div>
                 )}
@@ -190,25 +190,25 @@ const TransactionRow: React.FC<{ transaction: Transaction }> = ({ transaction })
 const ExploreServices: React.FC<{ setActiveView: (view: View) => void }> = ({ setActiveView }) => {
     const services = [
         {
-            title: 'Book Flights',
+            title: 'Global Services',
             description: 'Plan your next trip and pay directly.',
             icon: <AirplaneTicketIcon className="w-10 h-10 text-primary-300" />,
             view: 'flights' as View,
-            bgImage: 'https://images.unsplash.com/photo-1530521954074-e64f6810b32d?q=80&w=2940&auto=format&fit=crop'
+            bgImage: 'https://images.unsplash.com/photo-1570715725737-cfc8189c5689?q=80&w=2832&auto=format&fit=crop'
         },
         {
             title: 'Trade Crypto',
             description: 'Buy, sell, and hold digital assets securely.',
             icon: <ChartBarIcon className="w-10 h-10 text-primary-300" />,
             view: 'crypto' as View,
-            bgImage: 'https://images.unsplash.com/photo-1640340434855-6084b1f4901c?q=80&w=2832&auto=format&fit=crop'
+            bgImage: 'https://images.unsplash.com/photo-1642155533814-64b09e133857?q=80&w=2832&auto=format&fit=crop'
         },
         {
-            title: 'Get Insured',
+            title: 'Secure Services',
             description: 'Protect your transfers, travel, and more.',
             icon: <LifebuoyIcon className="w-10 h-10 text-primary-300" />,
             view: 'insurance' as View,
-            bgImage: 'https://images.unsplash.com/photo-1562577309-2592ab84b1bc?q=80&w=3030&auto=format&fit=crop'
+            bgImage: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2940&auto=format&fit=crop'
         }
     ];
 
@@ -222,7 +222,13 @@ const ExploreServices: React.FC<{ setActiveView: (view: View) => void }> = ({ se
                         onClick={() => setActiveView(service.view)}
                         className="group relative h-48 rounded-2xl text-white overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
                     >
-                        <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style={{ backgroundImage: `url(${service.bgImage})` }} />
+                        <div 
+                            className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110 animate-card-zoom" 
+                            style={{ 
+                                backgroundImage: `url(${service.bgImage})`,
+                                animationDuration: '30s'
+                            }} 
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10" />
                         <div className="relative h-full flex flex-col justify-end p-4 z-20 text-left">
                             <div className="mb-2 opacity-80 group-hover:opacity-100 transition-opacity">

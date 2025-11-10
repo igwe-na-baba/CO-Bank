@@ -26,23 +26,34 @@ export const Setup2FAModal: React.FC<Setup2FAModalProps> = ({ onClose, settings,
         }, 1000);
     };
 
-    const handleVerifySms = () => {
+    const handleSubmitSms = () => {
         setError('');
+        if (otp !== '123456') { // Demo OTP
+            setError('Invalid verification code.');
+            return;
+        }
         setIsProcessing(true);
         setTimeout(() => {
-            if (otp.length === 6) { // Demo check
-                onUpdate({ enabled: true, method: 'sms' });
-                setIsProcessing(false);
-                setStep('success');
-            } else {
-                setError('Invalid code. Please enter the 6-digit code.');
-                setIsProcessing(false);
-            }
+            onUpdate({ enabled: true, method: 'sms' });
+            setIsProcessing(false);
+            setStep('success');
         }, 1000);
     };
 
+    const handleEnableApp = () => {
+        setStep('setup_app');
+    };
+
     const handleDisable = () => {
-        onUpdate({ enabled: false, method: null });
+        setIsProcessing(true);
+        setTimeout(() => {
+            onUpdate({ enabled: false, method: null });
+            setIsProcessing(false);
+            setStep('manage'); // Go back to manage screen
+        }, 1000);
+    };
+    
+    const handleFinish = () => {
         onClose();
     };
 
@@ -51,70 +62,59 @@ export const Setup2FAModal: React.FC<Setup2FAModalProps> = ({ onClose, settings,
             case 'manage':
                 return (
                     <div className="space-y-4">
-                        <p className="text-sm text-slate-600">Select your preferred method for Two-Factor Authentication. This adds an extra layer of security to your account.</p>
-                        
-                        <button onClick={() => setStep('setup_sms')} className={`w-full text-left p-4 rounded-lg transition-all ${settings.method === 'sms' ? 'shadow-digital-inset' : 'shadow-digital'}`}>
-                            <div className="flex items-center justify-between">
-                                <span className="font-semibold text-slate-800">SMS Verification</span>
-                                {settings.method === 'sms' && <CheckCircleIcon className="w-5 h-5 text-green-600" />}
+                        {settings.enabled ? (
+                            <div className="text-center">
+                                <p className="text-slate-600">Two-Factor Authentication is currently <strong className="text-green-600">ENABLED</strong> using {settings.method?.toUpperCase()}.</p>
+                                <button onClick={handleDisable} disabled={isProcessing} className="w-full mt-4 py-3 text-white bg-red-600 rounded-lg font-semibold shadow-md flex items-center justify-center">
+                                     {isProcessing ? <SpinnerIcon className="w-5 h-5"/> : 'Disable 2FA'}
+                                </button>
                             </div>
-                        </button>
-                        
-                        <button onClick={() => setStep('setup_app')} className={`w-full text-left p-4 rounded-lg transition-all ${settings.method === 'app' ? 'shadow-digital-inset' : 'shadow-digital'}`}>
-                            <div className="flex items-center justify-between">
-                                <span className="font-semibold text-slate-800">Authenticator App</span>
-                                {settings.method === 'app' && <CheckCircleIcon className="w-5 h-5 text-green-600" />}
-                            </div>
-                        </button>
-
-                        {settings.enabled && (
-                             <button onClick={handleDisable} className="w-full mt-6 py-2 text-red-600 font-semibold">
-                                Disable Two-Factor Authentication
-                            </button>
+                        ) : (
+                            <>
+                                <p className="text-sm text-slate-600 text-center">Select a method to enable Two-Factor Authentication.</p>
+                                <button onClick={handleEnableSms} className="w-full flex items-center space-x-3 p-4 bg-slate-200 rounded-lg shadow-digital active:shadow-digital-inset">
+                                    <DevicePhoneMobileIcon className="w-6 h-6 text-primary" />
+                                    <div>
+                                        <p className="font-semibold text-slate-700">SMS Verification</p>
+                                        <p className="text-xs text-slate-500">Receive codes via text message.</p>
+                                    </div>
+                                </button>
+                                <button onClick={handleEnableApp} className="w-full flex items-center space-x-3 p-4 bg-slate-200 rounded-lg shadow-digital active:shadow-digital-inset">
+                                    <KeypadIcon className="w-6 h-6 text-primary" />
+                                     <div>
+                                        <p className="font-semibold text-slate-700">Authenticator App</p>
+                                        <p className="text-xs text-slate-500">Use an app like Google Authenticator.</p>
+                                    </div>
+                                </button>
+                            </>
                         )}
-                    </div>
-                );
-            case 'setup_sms':
-                return (
-                    <div>
-                        <button onClick={() => setStep('manage')} className="text-sm font-semibold text-primary mb-4">&larr; Back to methods</button>
-                        <p className="text-sm text-slate-600 mb-4">We will send a 6-digit verification code to your registered phone number: <strong>{phone}</strong>.</p>
-                        <button onClick={handleEnableSms} disabled={isProcessing} className="w-full mt-6 py-3 text-white bg-primary rounded-lg font-semibold shadow-md flex items-center justify-center">
-                            {isProcessing ? <SpinnerIcon className="w-5 h-5"/> : 'Send Verification Code'}
-                        </button>
                     </div>
                 );
             case 'verify_sms':
                 return (
-                    <div>
-                        <button onClick={() => setStep('setup_sms')} className="text-sm font-semibold text-primary mb-4">&larr; Back</button>
-                        <p className="text-sm text-slate-600 mb-4">Enter the 6-digit code sent to {phone}.</p>
-                        <input
-                            type="text"
-                            value={otp}
-                            onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                            className="w-48 mx-auto bg-slate-200 border-0 p-3 text-center text-3xl tracking-[.75em] rounded-md shadow-digital-inset"
-                            maxLength={6}
-                            placeholder="------"
-                            autoFocus
-                        />
-                         {error && <p className="text-red-500 text-xs mt-2 text-center">{error}</p>}
-                        <button onClick={handleVerifySms} disabled={isProcessing} className="w-full mt-6 py-3 text-white bg-primary rounded-lg font-semibold shadow-md flex items-center justify-center">
-                             {isProcessing ? <SpinnerIcon className="w-5 h-5"/> : 'Verify & Enable'}
-                        </button>
+                    <div className="text-center">
+                         <h4 className="font-semibold text-slate-700">Verify SMS</h4>
+                         <p className="text-sm text-slate-600 my-4">Enter the 6-digit code sent to {phone}.</p>
+                         <input type="text" value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} maxLength={6} className="w-48 mx-auto p-3 text-center text-3xl tracking-[1em] rounded-md shadow-digital-inset" placeholder="------" autoFocus />
+                         {error && <p className="text-red-500 text-xs text-center mt-2">{error}</p>}
+                         <div className="mt-6 flex gap-3">
+                             <button onClick={() => setStep('manage')} disabled={isProcessing} className="w-full py-3 text-slate-700 bg-slate-200 rounded-lg font-semibold shadow-digital">Back</button>
+                            <button onClick={handleSubmitSms} disabled={isProcessing || otp.length !== 6} className="w-full py-3 text-white bg-primary rounded-lg font-semibold shadow-md flex items-center justify-center disabled:bg-primary/50">
+                                {isProcessing ? <SpinnerIcon className="w-5 h-5"/> : 'Verify & Enable'}
+                            </button>
+                        </div>
                     </div>
                 );
             case 'setup_app':
-                return (
-                     <div>
-                        <button onClick={() => setStep('manage')} className="text-sm font-semibold text-primary mb-4">&larr; Back to methods</button>
-                        <p className="text-sm text-slate-600 mb-4">1. Scan this QR code with your authenticator app (e.g., Google Authenticator, Authy).</p>
-                        <div className="p-4 bg-white rounded-lg shadow-digital-inset w-40 h-40 mx-auto flex items-center justify-center">
-                            {/* Placeholder for QR Code */}
-                             <p className="text-xs text-slate-500">QR Code</p>
-                        </div>
-                        <p className="text-sm text-slate-600 my-4">2. Enter the 6-digit code from your app to verify.</p>
-                        <button onClick={() => onUpdate({ enabled: true, method: 'app' })} className="w-full py-3 text-white bg-primary rounded-lg font-semibold shadow-md">Verify & Enable (Demo)</button>
+                 return (
+                    <div className="text-center">
+                         <h4 className="font-semibold text-slate-700">Setup Authenticator App</h4>
+                         <p className="text-sm text-slate-600 my-4">Scan this QR code with your authenticator app, then enter the code to verify.</p>
+                         <div className="w-40 h-40 bg-white p-2 rounded-lg shadow-inner mx-auto flex items-center justify-center">
+                            <img src="https://quickchart.io/qr?text=otpauth://totp/iCreditUnion:randy.m.chitwood?secret=JBSWY3DPEHPK3PXP&issuer=iCreditUnion" alt="QR Code"/>
+                         </div>
+                          {/* OTP input and verification would go here */}
+                         <button onClick={() => setStep('manage')} className="w-full mt-6 py-3 text-slate-700 bg-slate-200 rounded-lg font-semibold shadow-digital">Back</button>
                     </div>
                 );
             case 'success':
@@ -122,8 +122,8 @@ export const Setup2FAModal: React.FC<Setup2FAModalProps> = ({ onClose, settings,
                     <div className="text-center">
                         <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto" />
                         <h3 className="mt-4 text-2xl font-bold text-slate-800">2FA Enabled!</h3>
-                        <p className="text-slate-600 mt-2">Your account is now protected with Two-Factor Authentication.</p>
-                        <button onClick={onClose} className="w-full mt-6 py-3 text-white bg-primary rounded-lg font-semibold shadow-md">
+                        <p className="text-slate-600 mt-2">Your account is now more secure.</p>
+                        <button onClick={handleFinish} className="w-full mt-6 py-3 text-white bg-primary rounded-lg font-semibold shadow-md">
                             Done
                         </button>
                     </div>
@@ -131,19 +131,18 @@ export const Setup2FAModal: React.FC<Setup2FAModalProps> = ({ onClose, settings,
         }
     };
 
-    // FIX: Add the main modal return statement which was missing.
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 animate-fade-in">
-            <div className="bg-slate-200 rounded-2xl shadow-digital p-8 w-full max-w-md m-4 relative animate-fade-in-up">
-                <div className="text-center mb-6">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+            <div className="bg-slate-200 rounded-2xl shadow-digital p-8 w-full max-w-md m-4">
+                 <div className="text-center mb-6">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-200 rounded-full mb-4 shadow-digital">
-                        {step === 'success' ? <CheckCircleIcon className="w-8 h-8 text-green-500"/> : <DevicePhoneMobileIcon className="w-8 h-8 text-primary"/>}
+                        <DevicePhoneMobileIcon className="w-8 h-8 text-primary"/>
                     </div>
                     <h2 className="text-2xl font-bold text-slate-800">Two-Factor Authentication</h2>
                 </div>
                 {renderContent()}
-                <button onClick={onClose} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full">
-                    <XIcon className="w-6 h-6"/>
+                <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                    <XIcon className="w-6 h-6" />
                 </button>
             </div>
         </div>

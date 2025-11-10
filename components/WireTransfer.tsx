@@ -8,7 +8,7 @@ import { BankSelector } from './BankSelector';
 interface WireTransferProps {
     accounts: Account[];
     recipients: Recipient[];
-    onSendWire: (data: any) => Transaction | null;
+    onSendWire: (data: any) => Promise<Transaction | null>;
     onClose: () => void;
     initialData?: {
         bankName?: string;
@@ -125,6 +125,24 @@ export const WireTransfer: React.FC<WireTransferProps> = ({ accounts, onSendWire
         setIsBankSelectorOpen(false);
         if (errors.bankName) setErrors(prev => ({...prev, bankName: null}));
     };
+
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        let error: string | null = null;
+        switch(name) {
+            case 'routingNumber':
+                if (formData.transferType === 'domestic' && !/^\d{9}$/.test(value)) {
+                    error = "ABA Routing Number must be 9 digits.";
+                }
+                break;
+            case 'swiftBic':
+                if (formData.transferType === 'international' && !/^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(value)) {
+                    error = "Invalid SWIFT/BIC format.";
+                }
+                break;
+        }
+        setErrors(prev => ({ ...prev, [name]: error }));
+    };
     
     const validateStep = (currentStep: number): boolean => {
         const newErrors: Record<string, string | null> = {};
@@ -165,21 +183,19 @@ export const WireTransfer: React.FC<WireTransferProps> = ({ accounts, onSendWire
 
     const handleBack = () => setStep(prev => prev - 1);
     
-    const handleSend = () => {
+    const handleSend = async () => {
         if (!validateStep(3)) return;
 
         setIsProcessing(true);
-        setTimeout(() => {
-            const tx = onSendWire(formData);
-            if (tx) {
-                setSentTransaction(tx);
-                setStep(4); // Move to final confirmation step
-            } else {
-                setErrors({ final: 'An unknown error occurred. Please try again.' });
-                setStep(3); // Go back to review/pin step on error
-            }
-            setIsProcessing(false);
-        }, 2000);
+        const tx = await onSendWire(formData);
+        if (tx) {
+            setSentTransaction(tx);
+            setStep(4); // Move to final confirmation step
+        } else {
+            setErrors({ final: 'An unknown error occurred. Please try again.' });
+            setStep(3); // Go back to review/pin step on error
+        }
+        setIsProcessing(false);
     };
 
     const inputClasses = (name: string) => `mt-1 w-full bg-slate-700/50 border border-slate-600 text-slate-100 placeholder-slate-400 focus:bg-slate-700 focus:outline-none p-3 rounded-md transition-colors ${errors[name] ? 'ring-2 ring-red-500' : 'focus:ring-2 focus:ring-primary'}`;
@@ -261,9 +277,9 @@ export const WireTransfer: React.FC<WireTransferProps> = ({ accounts, onSendWire
                                     </button>
                                      <input type="text" name="accountNumber" value={formData.accountNumber} onChange={handleChange} className={inputClasses('accountNumber')} placeholder={formData.transferType === 'international' ? "IBAN / Account Number" : "Account Number"} />
                                     {formData.transferType === 'domestic' ? (
-                                        <input type="text" name="routingNumber" value={formData.routingNumber} onChange={handleChange} className={inputClasses('routingNumber')} placeholder="ABA Routing Number" />
+                                        <input type="text" name="routingNumber" value={formData.routingNumber} onChange={handleChange} onBlur={handleBlur} className={inputClasses('routingNumber')} placeholder="ABA Routing Number" />
                                     ) : (
-                                        <input type="text" name="swiftBic" value={formData.swiftBic} onChange={handleChange} className={inputClasses('swiftBic')} placeholder="SWIFT/BIC Code" />
+                                        <input type="text" name="swiftBic" value={formData.swiftBic} onChange={handleChange} onBlur={handleBlur} className={inputClasses('swiftBic')} placeholder="SWIFT/BIC Code" />
                                     )}
                                     <div className="relative">
                                         <input type="text" name="intermediaryBank" value={formData.intermediaryBank} onChange={handleChange} className={`${inputClasses('intermediaryBank')} pr-10`} placeholder="Intermediary Bank (Optional)" />

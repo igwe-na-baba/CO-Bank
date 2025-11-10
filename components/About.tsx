@@ -28,7 +28,7 @@ export const About: React.FC = () => {
         <div className="space-y-12">
             {/* Hero Section */}
             <div className="relative rounded-2xl p-8 md:p-16 bg-slate-800 text-center overflow-hidden">
-                <div className="absolute inset-0 z-0 bg-cover bg-center opacity-10 animate-ken-burns" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1518458028785-8fb3107ebb92?q=80&w=2940&auto=format&fit=crop')" }}></div>
+                <div className="absolute inset-0 z-0 bg-cover bg-center opacity-10 animate-ken-burns" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=2940&auto=format&fit=crop')" }}></div>
                 <div className="relative z-10">
                     <ICreditUnionLogo />
                     <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight mt-4">Our Mission</h1>
@@ -68,7 +68,7 @@ export const About: React.FC = () => {
             <div className="bg-slate-200 rounded-2xl shadow-digital p-6 md:p-8">
                  <h2 className="text-3xl font-bold text-slate-800 text-center mb-8">Our Global Presence</h2>
                  <div className="relative h-64 md:h-96 w-full rounded-lg overflow-hidden shadow-inner bg-slate-300">
-                    <img src="https://i.imgur.com/gX3t5Xv.png" alt="World Map" className="w-full h-full object-contain opacity-50"/>
+                    <img src="https://i.postimg.cc/pTfCqSjN/IOe9-Qna.jpg" alt="World Map" className="w-full h-full object-contain opacity-50"/>
                     {/* Office dots */}
                     <div className="absolute w-4 h-4 bg-primary rounded-full animate-pulse" style={{ top: '35%', left: '23%' }} title="New York (HQ)"></div>
                     <div className="absolute w-3 h-3 bg-primary rounded-full animate-pulse" style={{ top: '30%', left: '48%' }} title="London"></div>

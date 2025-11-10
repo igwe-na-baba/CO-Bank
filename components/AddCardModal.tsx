@@ -76,7 +76,7 @@ export const AddCardModal: React.FC<AddCardModalProps> = ({ onClose, onAddCard }
         setTimeout(() => {
             const lastFour = cardData.fullNumber.slice(-4);
             // FIX: Added the required `cardType` property, defaulting to 'CREDIT'.
-            onAddCard({ ...cardData, lastFour, network: cardNetwork as 'Visa' | 'Mastercard', cardType: 'CREDIT' });
+            onAddCard({ ...cardData, lastFour, network: cardNetwork as 'Visa' | 'Mastercard', cardType: 'CREDIT', creditDetails: { creditLimit: 10000, currentBalance: 0, statementBalance: 0, minimumPayment: 25, paymentDueDate: new Date(), apr: 21.99 } });
             onClose();
         }, 1500);
     };
@@ -114,8 +114,8 @@ export const AddCardModal: React.FC<AddCardModalProps> = ({ onClose, onAddCard }
                     <div className="pt-4 flex justify-end space-x-3">
                         <button type="button" onClick={onClose} disabled={isProcessing} className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-200 rounded-lg shadow-digital active:shadow-digital-inset transition-shadow">Cancel</button>
                         <button type="submit" disabled={isProcessing} className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg shadow-md hover:shadow-lg transition-shadow flex items-center">
-                            {isProcessing ? <SpinnerIcon className="w-5 h-5 mr-2"/> : null}
-                            {isProcessing ? 'Adding Card...' : 'Add Card'}
+                            {isProcessing && <SpinnerIcon className="w-5 h-5 mr-2" />}
+                            {isProcessing ? 'Adding...' : 'Add Card'}
                         </button>
                     </div>
                 </form>

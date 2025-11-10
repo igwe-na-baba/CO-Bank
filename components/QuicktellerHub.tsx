@@ -11,17 +11,25 @@ interface QuicktellerHubProps {
 const ActionButton: React.FC<{
     title: string;
     icon: React.ReactNode;
+    bgImage: string;
     onClick: () => void;
-}> = ({ title, icon, onClick }) => {
+}> = ({ title, icon, bgImage, onClick }) => {
     return (
         <button
             onClick={onClick}
-            className="group flex flex-col items-center justify-center p-4 bg-slate-700/50 rounded-2xl shadow-digital text-slate-200 transition-all duration-300 hover:bg-slate-700 active:shadow-digital-inset hover:-translate-y-1"
+            className="group relative h-40 rounded-2xl text-white overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
         >
-            <div className="p-4 bg-slate-800/50 rounded-full shadow-inner mb-3 transition-colors duration-300 group-hover:bg-primary/20">
-                {icon}
+            <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110 animate-card-zoom"
+                style={{ backgroundImage: `url(${bgImage})` }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10" />
+            <div className="relative h-full flex flex-col items-center justify-center p-4 z-20 text-center">
+                <div className="mb-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                    {icon}
+                </div>
+                <h4 className="font-bold text-lg leading-tight">{title}</h4>
             </div>
-            <h4 className="font-semibold text-center text-sm">{title}</h4>
         </button>
     );
 };
@@ -33,32 +41,38 @@ export const QuicktellerHub: React.FC<QuicktellerHubProps> = ({ setActiveView, o
     const actions = [
         {
             title: t('quick_actions_send_money'),
-            icon: <ArrowsRightLeftIcon className="w-8 h-8 text-primary-400" />,
+            icon: <ArrowsRightLeftIcon className="w-10 h-10 text-primary-300" />,
+            bgImage: 'https://images.unsplash.com/photo-1584223214223-c6b7b0551065?q=80&w=2849&auto=format&fit=crop',
             onClick: () => onOpenSendMoneyFlow('send'),
         },
         {
             title: t('quick_actions_pay_bills'),
-            icon: <CurrencyDollarIcon className="w-8 h-8 text-primary-400" />,
+            icon: <CurrencyDollarIcon className="w-10 h-10 text-primary-300" />,
+            bgImage: 'https://images.unsplash.com/photo-1633409361618-c167c13a5a78?q=80&w=2940&auto=format&fit=crop',
             onClick: () => setActiveView('utilities'),
         },
         {
             title: t('quick_actions_buy_airtime'),
-            icon: <DevicePhoneMobileIcon className="w-8 h-8 text-primary-400" />,
+            icon: <DevicePhoneMobileIcon className="w-10 h-10 text-primary-300" />,
+            bgImage: 'https://images.unsplash.com/photo-1517420704952-d9f39e95b412?q=80&w=2838&auto=format&fit=crop',
             onClick: () => setActiveView('quickteller'),
         },
         {
             title: t('quick_actions_scan_to_pay'),
-            icon: <QrCodeIcon className="w-8 h-8 text-primary-400" />,
+            icon: <QrCodeIcon className="w-10 h-10 text-primary-300" />,
+            bgImage: 'https://images.unsplash.com/photo-1605377222485-83c34794e773?q=80&w=2824&auto=format&fit=crop',
             onClick: () => setActiveView('qrScanner'),
         },
         {
             title: t('quick_actions_deposit_check'),
-            icon: <CameraIcon className="w-8 h-8 text-primary-400" />,
+            icon: <CameraIcon className="w-10 h-10 text-primary-300" />,
+            bgImage: 'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=2940&auto=format&fit=crop',
             onClick: () => onOpenSendMoneyFlow('deposit'),
         },
         {
             title: t('quick_actions_find_atm'),
-            icon: <MapPinIcon className="w-8 h-8 text-primary-400" />,
+            icon: <MapPinIcon className="w-10 h-10 text-primary-300" />,
+            bgImage: 'https://images.unsplash.com/photo-1598349942360-15339d19a489?q=80&w=2808&auto=format&fit=crop',
             onClick: () => setActiveView('atmLocator'),
         }
     ];
@@ -66,12 +80,13 @@ export const QuicktellerHub: React.FC<QuicktellerHubProps> = ({ setActiveView, o
     return (
         <div className="bg-slate-800/50 rounded-2xl p-6 shadow-digital">
             <h3 className="text-2xl font-bold text-slate-100 mb-4">{t('dashboard_quick_actions')}</h3>
-            <div className="grid grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                 {actions.map(action => (
                     <ActionButton
                         key={action.title}
                         title={action.title}
                         icon={action.icon}
+                        bgImage={action.bgImage}
                         onClick={action.onClick}
                     />
                 ))}

@@ -4,7 +4,7 @@ import { luhnCheck, validateExpiryDate, validateCvc } from '../utils/validation'
 
 interface AddFundsModalProps {
     onClose: () => void;
-    onAddFunds: (amount: number, cardLastFour: string, cardNetwork: 'Visa' | 'Mastercard') => void;
+    onAddFunds: (amount: number, cardLastFour: string, cardNetwork: 'Visa' | 'Mastercard') => Promise<void>;
 }
 
 type ModalStep = 'form' | 'processing' | 'success';
@@ -62,8 +62,8 @@ export const AddFundsModal: React.FC<AddFundsModalProps> = ({ onClose, onAddFund
         }
 
         setStep('processing');
-        setTimeout(() => {
-            onAddFunds(numericAmount, cardNumber.slice(-4), cardNetwork as 'Visa' | 'Mastercard');
+        setTimeout(async () => {
+            await onAddFunds(numericAmount, cardNumber.slice(-4), cardNetwork as 'Visa' | 'Mastercard');
             setStep('success');
         }, 2000);
     };

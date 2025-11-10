@@ -42,13 +42,11 @@ const securityCheckMessages = [
 ];
 
 const LoginBackground: React.FC = () => (
-    <div className="absolute inset-0 z-0">
-        <div
-            className="absolute inset-0 w-full h-full bg-cover bg-center animate-ken-burns"
-            style={{
-                backgroundImage: `url('https://images.unsplash.com/photo-1587145820266-a5951ee6f620?q=80&w=2874&auto=format&fit=crop')`,
-                animationDuration: '40s',
-            }}
+    <div className="absolute inset-0 z-0 overflow-hidden">
+        <img
+            src="https://images.unsplash.com/photo-1533929736458-ca588d08c8be?q=80&w=2940&auto=format&fit=crop"
+            alt="London street at night with light trails, representing global finance"
+            className="absolute inset-0 w-full h-full object-cover animate-ken-burns"
         />
         <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
     </div>
@@ -98,11 +96,16 @@ export const Welcome: React.FC<WelcomeProps> = ({ onLogin, onStartCreateAccount 
         setSecurityMessageIndex(prev => {
           if (prev >= securityCheckMessages.length - 1) {
             clearInterval(interval);
-            setTimeout(() => {
-                setStep('mfa');
+            setTimeout(async () => {
                 const { subject, body } = generateOtpEmail(USER_NAME);
-                sendTransactionalEmail(USER_EMAIL, subject, body);
-                sendSmsNotification(USER_PHONE, generateOtpSms());
+                const emailResult = await sendTransactionalEmail(USER_EMAIL, subject, body);
+                const smsResult = await sendSmsNotification(USER_PHONE, generateOtpSms());
+                if (!emailResult.success || !smsResult.success) {
+                    setError("Failed to send verification code. Please try logging in again.");
+                    setStep('password'); // Go back to a previous step
+                } else {
+                    setStep('mfa');
+                }
             }, 500);
             return prev;
           }
@@ -154,7 +157,7 @@ export const Welcome: React.FC<WelcomeProps> = ({ onLogin, onStartCreateAccount 
     setIsLoading(true);
     setError('');
     setTimeout(() => {
-      if (mfaCode.length === 6) {
+      if (mfaCode === '123456') { // Simulate correct OTP
         onLogin();
       } else {
         setError('Please enter a valid 6-digit code.');
@@ -198,7 +201,7 @@ export const Welcome: React.FC<WelcomeProps> = ({ onLogin, onStartCreateAccount 
     }
   }, [isBiometricSupported]);
 
-  const handleForgotPasswordSubmit = (e: React.FormEvent) => {
+  const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (!recoveryEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recoveryEmail)) {
@@ -206,13 +209,19 @@ export const Welcome: React.FC<WelcomeProps> = ({ onLogin, onStartCreateAccount 
         return;
     }
     setIsLoading(true);
-    setTimeout(() => {
-        const { subject, body } = generatePasswordResetEmail(USER_NAME, recoveryEmail);
-        sendTransactionalEmail(recoveryEmail, subject, body);
-        sendSmsNotification(USER_PHONE, generatePasswordResetSms());
+    
+    const { subject, body } = generatePasswordResetEmail(USER_NAME, recoveryEmail);
+    const emailResult = await sendTransactionalEmail(recoveryEmail, subject, body);
+    const smsResult = await sendSmsNotification(USER_PHONE, generatePasswordResetSms());
+
+    if (!emailResult.success || !smsResult.success) {
+        setError("We couldn't send a reset link at this time. Please try again later.");
         setIsLoading(false);
-        setView('forgot_password_confirmation');
-    }, 1500);
+        return;
+    }
+    
+    setIsLoading(false);
+    setView('forgot_password_confirmation');
   };
 
   const inputClasses = "w-full bg-slate-700/50 border-0 text-slate-100 placeholder-slate-400 focus:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-400 p-3 rounded-md shadow-digital-inset transition-colors";
@@ -323,8 +332,11 @@ export const Welcome: React.FC<WelcomeProps> = ({ onLogin, onStartCreateAccount 
 
   const renderMfaStep = () => (
     <div className="animate-fade-in-up text-center">
-        <h2 className="text-2xl font-bold text-slate-100 mb-2">Verification Required</h2>
-        <p className="text-sm text-slate-300 mb-6">A verification code was sent to your registered device.</p>
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-700/50 rounded-full mb-4">
+            <DevicePhoneMobileIcon className="w-8 h-8 text-primary"/>
+        </div>
+        <h2 className="text-2xl font-bold text-slate-100 mb-2">Check your phone</h2>
+        <p className="text-sm text-slate-300 mb-6">We've sent a 6-digit verification code via SMS to your registered phone number.</p>
         <form onSubmit={handleMfaSubmit}>
             <input
                 type="text"

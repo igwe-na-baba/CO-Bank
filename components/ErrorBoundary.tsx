@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { ErrorInfo, ReactNode } from 'react';
 import { ICreditUnionLogo } from './Icons';
 
 interface Props {
@@ -9,9 +9,12 @@ interface State {
   hasError: boolean;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
-  // FIX: Initialized state using a class property to resolve errors with `this.state` and `this.props`.
-  state: State = { hasError: false };
+export class ErrorBoundary extends React.Component<Props, State> {
+  // FIX: Replaced state class property with a constructor to explicitly initialize `this.props` and `this.state`, resolving the TypeScript error where `props` was not found on the class type.
+  constructor(props: Props) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
   static getDerivedStateFromError(_: Error): State {
     // Update state so the next render will show the fallback UI.

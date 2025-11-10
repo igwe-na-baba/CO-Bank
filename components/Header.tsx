@@ -6,6 +6,7 @@ import { Notification, View, UserProfile } from '../types';
 import { MegaMenu } from './MegaMenu';
 import { NotificationsPanel } from './NotificationsPanel';
 import { useLanguage } from '../contexts/LanguageContext';
+import { ProfileDropdown } from './ProfileDropdown';
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -24,7 +25,9 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onMenuToggle, isMenuOpen, activeView, setActiveView, onLogout, notifications, onMarkNotificationsAsRead, onNotificationClick, userProfile, onOpenLanguageSelector, onOpenSendMoneyFlow, onOpenWireTransfer }) => {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const notificationsRef = useRef<HTMLDivElement>(null);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
   
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -49,6 +52,17 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle, isMenuOpen, active
   }
 
   useOutsideAlerter(notificationsRef, () => setShowNotifications(false));
+  useOutsideAlerter(profileDropdownRef, () => setIsProfileDropdownOpen(false));
+
+  const handleProfileNavigate = (view: View) => {
+      setActiveView(view);
+      setIsProfileDropdownOpen(false);
+  }
+
+  const handleProfileLogout = () => {
+      onLogout();
+      setIsProfileDropdownOpen(false);
+  }
 
   return (
     <>
@@ -91,16 +105,26 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle, isMenuOpen, active
                         </button>
                         {showNotifications && <NotificationsPanel notifications={notifications} onClose={() => setShowNotifications(false)} onNotificationClick={onNotificationClick} />}
                     </div>
-                     <button
-                        onClick={onLogout}
-                        className="p-2 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
-                        aria-label="Logout"
-                    >
-                        <LogoutIcon className="w-6 h-6" />
-                    </button>
-                    <button onClick={() => setActiveView('security')} className="rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-white" aria-label="Open security settings">
-                        <img src={userProfile.profilePictureUrl} alt="User Profile" className="w-10 h-10 rounded-full" />
-                    </button>
+                    <div className="relative" ref={profileDropdownRef}>
+                        <button 
+                            onClick={() => setIsProfileDropdownOpen(prev => !prev)} 
+                            className="rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-white" 
+                            aria-label="Open user menu"
+                            aria-haspopup="true"
+                            aria-expanded={isProfileDropdownOpen}
+                            id="user-menu-button"
+                        >
+                            <img src={userProfile.profilePictureUrl} alt="User Profile" className="w-10 h-10 rounded-full" />
+                        </button>
+
+                        {isProfileDropdownOpen && (
+                            <ProfileDropdown 
+                                userProfile={userProfile}
+                                onNavigate={handleProfileNavigate}
+                                onLogout={handleProfileLogout}
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

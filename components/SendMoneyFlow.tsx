@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { Recipient, Transaction, Account, SecuritySettings, View, TransactionStatus, AccountType, UserProfile } from '../types';
 import { STANDARD_FEE, EXPRESS_FEE, EXCHANGE_RATES, TRANSFER_PURPOSES, USER_PIN, NETWORK_AUTH_CODE } from '../constants';
-import { SpinnerIcon, CheckCircleIcon, ExclamationTriangleIcon, KeypadIcon, FaceIdIcon, ShieldCheckIcon, CameraIcon, ClipboardDocumentIcon, XIcon, XCircleIcon, NetworkIcon, GlobeAltIcon, UsersIcon, getBankIcon, ArrowRightIcon, ScaleIcon, SendIcon } from './Icons';
+import { SpinnerIcon, CheckCircleIcon, ExclamationTriangleIcon, KeypadIcon, FaceIdIcon, ShieldCheckIcon, CameraIcon, ClipboardDocumentIcon, XIcon, XCircleIcon, NetworkIcon, GlobeAltIcon, UsersIcon, getBankIcon, ArrowRightIcon, ScaleIcon, SendIcon, DevicePhoneMobileIcon, FingerprintIcon } from './Icons';
 import { triggerHaptic } from '../utils/haptics';
 import { PaymentReceipt } from './PaymentReceipt';
 import { CheckDepositFlow } from './CheckDepositFlow';
 import { TransferConfirmationModal } from './TransferConfirmationModal';
 import { RecipientSelector } from './RecipientSelector';
+import { sendSmsNotification, generateOtpSms } from '../services/notificationService';
 
 
 interface SendMoneyFlowProps {
@@ -27,13 +28,6 @@ interface SendMoneyFlowProps {
   userProfile: UserProfile;
   onContactSupport: () => void;
 }
-
-const securityCheckMessages = [
-    'Verifying transaction details...',
-    'Running fraud analysis...',
-    'Performing compliance screening...',
-    'Finalizing secure transfer...'
-];
 
 const TABS = [
     { id: 'send', label: 'Send', icon: <SendIcon className="w-5 h-5 mr-2" /> },
@@ -76,14 +70,16 @@ export const SendMoneyFlow: React.FC<SendMoneyFlowProps> = ({ recipients, accoun
 
 
   // Security State
+  const [authStep, setAuthStep] = useState<'initial' | 'pin' | 'sms'>('initial');
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const authAttempted = useRef(false);
 
   // Transaction State
   const [createdTransaction, setCreatedTransaction] = useState<Transaction | null>(null);
-  const [securityCheckMessageIndex, setSecurityCheckMessageIndex] = useState(0);
   
   const sourceAccount = accounts.find(acc => acc.id === sourceAccountId);
 
@@ -163,21 +159,32 @@ export const SendMoneyFlow: React.FC<SendMoneyFlowProps> = ({ recipients, accoun
     }
   }, [step, rateLockCountdown]);
 
+  // FIX: This effect handles the automatic progression from the "Security Check" step (3) to the "Complete" step (4).
   useEffect(() => {
-    if (step === 3) { // Security Check step
-        const interval = setInterval(() => {
-            setSecurityCheckMessageIndex(prev => {
-                if (prev >= securityCheckMessages.length - 1) {
-                    clearInterval(interval);
-                    setTimeout(() => handleNextStep(), 500); // Move to success step
-                    return prev;
-                }
-                return prev + 1;
-            });
-        }, 1200);
-        return () => clearInterval(interval);
+    if (step === 3 && createdTransaction) {
+      const securityCheckTimer = setTimeout(() => {
+        handleNextStep(); // This will move from step 3 to step 4
+      }, 1500); // Simulate a 1.5 second security check
+
+      return () => clearTimeout(securityCheckTimer);
     }
-  }, [step, handleNextStep]);
+  }, [step, createdTransaction, handleNextStep]);
+
+  useEffect(() => {
+    if (step === 2) {
+      setAuthStep('initial');
+    }
+    if (step !== 2) {
+        // Reset all auth state when leaving the authorization step
+        setAuthStep('initial');
+        setPin('');
+        setPinError('');
+        setOtp('');
+        setOtpError('');
+        setIsAuthenticating(false);
+        setIsSendingOtp(false);
+    }
+  }, [step]);
 
   useEffect(() => {
     if (transactionToRepeat) {
@@ -192,10 +199,7 @@ export const SendMoneyFlow: React.FC<SendMoneyFlowProps> = ({ recipients, accoun
         setDeliverySpeed(transactionToRepeat.deliverySpeed || 'Standard');
         
         // Reset other state
-        setPin('');
-        setPinError('');
         setCreatedTransaction(null);
-        setIsAuthenticating(false);
     }
   }, [transactionToRepeat, recipients]);
   
@@ -221,7 +225,7 @@ export const SendMoneyFlow: React.FC<SendMoneyFlowProps> = ({ recipients, accoun
         handleNextStep(); // Move to Security Check
     }
   }, [createTransaction, deliverySpeed, exchangeRate, fee, hapticTrigger, handleNextStep, numericSendAmount, purpose, receiveAmount, receiveCurrency, selectedRecipient, sourceAccount]);
-
+  
   const handlePinSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     hapticTrigger();
@@ -242,25 +246,51 @@ export const SendMoneyFlow: React.FC<SendMoneyFlowProps> = ({ recipients, accoun
     hapticTrigger();
     setIsAuthenticating(true);
     setPinError('');
+    setOtpError('');
     try {
         await new Promise(resolve => setTimeout(resolve, 1500));
         if(activeTab === 'send') handleConfirmAndSend();
         else if(activeTab === 'split') setIsConfirmationModalOpen(true);
     } catch (error) {
         console.error("Biometric auth failed", error);
-        setPinError('Biometric authentication failed. Please use your PIN.');
+        setPinError('Biometric authentication failed. Please use another method.');
         setIsAuthenticating(false);
     }
   }, [hapticTrigger, handleConfirmAndSend, activeTab]);
-  
-  useEffect(() => {
-    if (step === 2 && securitySettings.biometricsEnabled && !authAttempted.current) {
-      authAttempted.current = true;
-      handleBiometricAuth();
-    }
-    if (step !== 2) authAttempted.current = false;
-  }, [step, securitySettings.biometricsEnabled, handleBiometricAuth]);
 
+  const handleSendOtp = async () => {
+      setIsSendingOtp(true);
+      setPinError('');
+      setOtpError('');
+      
+      const { success } = await sendSmsNotification(userProfile.phone!, generateOtpSms());
+      
+      setIsSendingOtp(false);
+      if (success) {
+          setAuthStep('sms');
+      } else {
+          setPinError("Failed to send SMS. Please try again or use another method.");
+      }
+  };
+
+  const handleOtpSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      hapticTrigger();
+      setIsAuthenticating(true);
+      setPinError('');
+      setOtpError('');
+      
+      setTimeout(() => { // Simulate API call
+          if (otp === '123456') { 
+              if(activeTab === 'send') handleConfirmAndSend();
+              else if (activeTab === 'split') setIsConfirmationModalOpen(true);
+          } else {
+              setOtpError('Incorrect code. Please try again.');
+              setIsAuthenticating(false);
+          }
+      }, 500);
+  };
+  
   const handleStartOver = () => {
     hapticTrigger();
     setStep(0);
@@ -366,7 +396,7 @@ export const SendMoneyFlow: React.FC<SendMoneyFlowProps> = ({ recipients, accoun
                          <div className="mt-1 relative rounded-md shadow-digital-inset bg-slate-200 flex items-center">
                            <input type="number" value={sendAmount} onChange={e => setSendAmount(e.target.value)} className="w-full bg-transparent border-0 p-3 pr-4 text-lg font-mono text-slate-800 flex-grow" placeholder="0.00"/>
                            <div className="p-3 flex items-center space-x-2 border-l border-slate-300 pointer-events-none">
-                              <img src={`https://flagcdn.com/w40/us.png`} alt="USD flag" className="w-5 h-auto" />
+                              <img src={`https://flagsapi.com/US/shiny/32.png`} alt="USD flag" className="w-5 h-auto" />
                              <span className="text-slate-500 font-semibold">USD</span>
                            </div>
                          </div>
@@ -497,28 +527,64 @@ export const SendMoneyFlow: React.FC<SendMoneyFlowProps> = ({ recipients, accoun
           </div>
         );
       case 2:
-          return (
-              <div className="text-center p-4">
-                  <h2 className="text-2xl font-bold text-slate-800">Authorize Payment</h2>
-                  <form onSubmit={handlePinSubmit}>
-                      <label className="text-slate-600 my-4 block">Please enter your 4-digit security PIN.</label>
-                      <input type="password" value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))} className="w-48 mx-auto bg-slate-200 border-0 p-3 text-center text-3xl tracking-[.75em] rounded-md shadow-digital-inset" maxLength={4} placeholder="----" autoFocus />
-                      {pinError && <p className="mt-2 text-sm text-red-500">{pinError}</p>}
-                       <div className="mt-6 flex space-x-3">
-                          <button type="button" onClick={handlePrevStep} className="w-full py-3 text-slate-700 bg-slate-200 rounded-lg font-semibold shadow-digital" disabled={isAuthenticating}>Back</button>
-                          <button type="submit" disabled={pin.length !== 4 || isAuthenticating} className="w-full py-3 text-white bg-primary rounded-lg font-semibold shadow-md disabled:bg-primary/50"> Authorize & Send </button>
-                      </div>
-                  </form>
-              </div>
-          );
-      case 3: // Security Check
+        const pinInputClasses = `w-48 mx-auto bg-slate-200 border-0 p-3 text-center text-3xl tracking-[.75em] rounded-md shadow-digital-inset ${pinError ? 'ring-2 ring-red-500' : ''}`;
+        const otpInputClasses = `w-48 mx-auto bg-slate-200 border-0 p-3 text-center text-3xl tracking-[.75em] rounded-md shadow-digital-inset ${otpError ? 'ring-2 ring-red-500' : ''}`;
         return (
-            <div className="text-center p-8">
-                <SpinnerIcon className="w-12 h-12 text-primary mx-auto" />
-                <h3 className="mt-4 text-xl font-bold text-slate-800">{securityCheckMessages[securityCheckMessageIndex]}</h3>
-                <p className="text-slate-600 mt-2">This is a standard security procedure to protect your account.</p>
+            <div className="text-center p-4 min-h-[350px] flex flex-col justify-center animate-fade-in-up">
+                <h2 className="text-2xl font-bold text-slate-800">Authorize Payment</h2>
+                
+                {authStep === 'sms' ? (
+                    <form onSubmit={handleOtpSubmit}>
+                        <label className="text-slate-600 my-4 block">Enter the 6-digit code sent via SMS to your registered phone.</label>
+                        <input type="text" value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} className={otpInputClasses} maxLength={6} placeholder="------" autoFocus />
+                        {otpError && <p className="mt-2 text-sm text-red-500">{otpError}</p>}
+                        <div className="mt-6 flex space-x-3">
+                            <button type="button" onClick={() => setAuthStep('initial')} className="w-full py-3 text-slate-700 bg-slate-200 rounded-lg font-semibold shadow-digital" disabled={isAuthenticating}>Back</button>
+                            <button type="submit" disabled={otp.length !== 6 || isAuthenticating} className="w-full py-3 text-white bg-primary rounded-lg font-semibold shadow-md disabled:bg-primary/50 flex items-center justify-center">
+                              {isAuthenticating ? <SpinnerIcon className="w-5 h-5"/> : 'Verify & Send' }
+                            </button>
+                        </div>
+                    </form>
+                ) : authStep === 'pin' ? (
+                    <form onSubmit={handlePinSubmit}>
+                        <label className="text-slate-600 my-4 block">Please enter your 4-digit security PIN.</label>
+                        <input type="password" value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))} className={pinInputClasses} maxLength={4} placeholder="----" autoFocus />
+                        {pinError && <p className="mt-2 text-sm text-red-500">{pinError}</p>}
+                        <div className="mt-6 flex space-x-3">
+                            <button type="button" onClick={() => setAuthStep('initial')} className="w-full py-3 text-slate-700 bg-slate-200 rounded-lg font-semibold shadow-digital" disabled={isAuthenticating}>Back</button>
+                            <button type="submit" disabled={pin.length !== 4 || isAuthenticating} className="w-full py-3 text-white bg-primary rounded-lg font-semibold shadow-md disabled:bg-primary/50 flex items-center justify-center">
+                              {isAuthenticating ? <SpinnerIcon className="w-5 h-5"/> : 'Authorize & Send' }
+                            </button>
+                        </div>
+                    </form>
+                ) : (
+                    <div className="space-y-4 mt-6">
+                        <p className="text-slate-600">For your security, please choose a method to verify this transaction.</p>
+                        {isAuthenticating ? <SpinnerIcon className="w-8 h-8 mx-auto text-primary" /> : (
+                          <>
+                            <button onClick={handleSendOtp} disabled={isSendingOtp} className="w-full flex items-center justify-center space-x-2 py-3 bg-slate-200 text-slate-800 rounded-lg font-semibold shadow-digital active:shadow-digital-inset">
+                                {isSendingOtp ? <SpinnerIcon className="w-5 h-5"/> : <DevicePhoneMobileIcon className="w-5 h-5"/>}
+                                <span>Send SMS Verification Code</span>
+                            </button>
+                            <button onClick={() => setAuthStep('pin')} className="w-full flex items-center justify-center space-x-2 py-3 bg-slate-200 text-slate-800 rounded-lg font-semibold shadow-digital active:shadow-digital-inset">
+                                <KeypadIcon className="w-5 h-5"/>
+                                <span>Use Security PIN</span>
+                            </button>
+                            {securitySettings.biometricsEnabled && (
+                                <button onClick={() => handleBiometricAuth()} className="w-full flex items-center justify-center space-x-2 py-3 bg-slate-200 text-slate-800 rounded-lg font-semibold shadow-digital active:shadow-digital-inset">
+                                    {typeof window.ontouchstart !== 'undefined' ? <FaceIdIcon className="w-5 h-5"/> : <FingerprintIcon className="w-5 h-5"/>}
+                                    <span>Use Biometrics</span>
+                                </button>
+                            )}
+                            <button type="button" onClick={handlePrevStep} className="w-full py-3 text-slate-700 bg-slate-200 rounded-lg font-semibold shadow-digital mt-4">Back to Review</button>
+                          </>
+                        )}
+                    </div>
+                )}
             </div>
         );
+      case 3: // SecurityCheck
+        return <div className="min-h-[350px] flex items-center justify-center"><SpinnerIcon className="w-12 h-12 text-primary"/></div>;
       case 4:
         if (!liveTransaction || !sourceAccount) return <div className="text-center p-8"> <SpinnerIcon className="w-12 h-12 text-primary mx-auto"/> <p className="mt-4 text-slate-600">Finalizing transaction...</p> </div>;
         

@@ -21,9 +21,6 @@ export const DownloadableReceipt: React.FC<DownloadableReceiptProps> = ({ transa
 
     return (
         <div className="w-[800px] bg-white text-gray-800 p-10 font-sans">
-            {isCompleted && (
-                <img src="https://i.imgur.com/eB4kH1g.png" alt="Paid Stamp" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-auto opacity-10 transform -rotate-12 pointer-events-none" />
-            )}
             {/* Header */}
             <div className="flex justify-between items-center border-b-2 border-gray-200 pb-4">
                 <div className="flex items-center space-x-3">
@@ -46,7 +43,7 @@ export const DownloadableReceipt: React.FC<DownloadableReceiptProps> = ({ transa
                 <h3 className="font-semibold text-gray-500 border-b pb-2 mb-3 text-sm uppercase tracking-wider">Transfer Path</h3>
                 <div className="flex items-center justify-between text-center">
                     <div className="w-2/5">
-                        <img src={`https://flagcdn.com/w40/us.png`} alt="USA Flag" className="w-8 mx-auto mb-1 rounded" />
+                        <img src={`https://flagsapi.com/US/shiny/64.png`} alt="USA Flag" className="w-8 mx-auto mb-1 rounded" />
                         <p className="font-semibold text-gray-800 truncate">New York, USA</p>
                         <p className="text-xs text-gray-500">Origin</p>
                     </div>
@@ -54,7 +51,7 @@ export const DownloadableReceipt: React.FC<DownloadableReceiptProps> = ({ transa
                         &rarr;
                     </div>
                     <div className="w-2/5">
-                        <img src={`https://flagcdn.com/w40/${transaction.recipient.country.code.toLowerCase()}.png`} alt={`${transaction.recipient.country.name} Flag`} className="w-8 mx-auto mb-1 rounded" />
+                        <img src={`https://flagsapi.com/${transaction.recipient.country.code}/shiny/64.png`} alt={`${transaction.recipient.country.name} Flag`} className="w-8 mx-auto mb-1 rounded" />
                         <p className="font-semibold text-gray-800 truncate">{transaction.recipient.city}, {transaction.recipient.country.code}</p>
                         <p className="text-xs text-gray-500">Destination</p>
                     </div>
@@ -101,13 +98,20 @@ export const DownloadableReceipt: React.FC<DownloadableReceiptProps> = ({ transa
             {/* QR Code and Stamp */}
             <div className="mt-8 flex justify-between items-end">
                  <div className="text-left">
-                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=iCU-Txn-${transaction.id}`} alt="Transaction QR Code" className="w-24 h-24" />
+                    <img src={`https://quickchart.io/qr?text=iCU-Txn-${transaction.id}&size=100`} alt="Transaction QR Code" className="w-24 h-24" />
                     <p className="text-xs text-gray-500 mt-1">Scan for details</p>
                  </div>
-                 <div className="text-center relative w-48 h-24">
-                    <img src="https://i.imgur.com/8Q9g2o4.png" alt="Signature" className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-auto mix-blend-darken" />
-                    <p className="absolute bottom-0 w-full text-xs text-gray-500 border-t-2 border-gray-800 mt-1 pt-1">Authorized Signatory</p>
-                 </div>
+                 <div className="relative w-48 h-24 flex items-center justify-center">
+                    {isCompleted && (
+                        <div className="stamp stamp-red" style={{width: 140, height: 140, opacity: 0.75}}>
+                            <div className="stamp-inner">
+                                <div className="text-lg leading-tight">Verified</div>
+                                <div className="text-[10px] my-1">{submissionDate.toLocaleDateString()}</div>
+                                <div className="text-[10px] tracking-normal">iCredit Union®</div>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Footer */}

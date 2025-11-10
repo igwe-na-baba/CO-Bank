@@ -185,12 +185,12 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({ isOpen, onClose, activeView,
                                                         onClick={() => handleItemClick(item.view)}
                                                         className={`w-full group flex items-start space-x-3 p-3 rounded-lg text-left transition-all duration-200 ${isActive ? 'bg-primary/20 text-primary-300' : 'hover:bg-primary/10 hover:text-primary-300'}`}
                                                     >
-                                                        <div className={`flex-shrink-0 p-2 rounded-lg transition-all duration-200 ${isActive ? 'bg-primary text-white' : 'bg-slate-700 text-slate-300 group-hover:bg-primary/80 group-hover:text-white'}`}>
-                                                            <Icon className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
+                                                        <div className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg transition-colors duration-200 ${isActive ? 'bg-primary/20 text-primary-300' : 'bg-white/5 text-slate-300 group-hover:bg-primary/20 group-hover:text-primary-300'}`}>
+                                                            <Icon className="w-5 h-5" />
                                                         </div>
                                                         <div>
-                                                            <p className={`font-semibold ${isActive ? 'text-primary-300' : 'text-slate-200 group-hover:text-primary-300'}`}>{item.label}</p>
-                                                            <p className="text-xs text-slate-400">{item.description}</p>
+                                                            <p className="font-semibold">{item.label}</p>
+                                                            <p className={`text-xs ${isActive ? 'text-slate-300' : 'text-slate-400 group-hover:text-slate-300'}`}>{item.description}</p>
                                                         </div>
                                                     </button>
                                                 </li>
