@@ -66,26 +66,26 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle, isMenuOpen, active
 
   return (
     <>
-      <header className="bg-slate-800/80 backdrop-blur-md sticky top-0 z-30 shadow-lg">
+      <header className="bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-md sticky top-0 z-30 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-20">
                 {/* Left side: Menu and Title */}
                 <div className="flex items-center space-x-4">
                     <button
                         onClick={onMenuToggle}
-                        className="p-2 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+                        className="p-2 rounded-full text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/10 transition-colors"
                         aria-label="Open menu"
                     >
                         <MenuIcon className="w-6 h-6" />
                     </button>
-                    <h1 className="text-xl font-bold text-white hidden sm:block">{t(`header_title_${activeView}`)}</h1>
+                    <h1 className="text-xl font-bold text-slate-900 dark:text-white hidden sm:block">{t(`header_title_${activeView}`)}</h1>
                 </div>
                 
                 {/* Right side actions */}
                 <div className="flex items-center space-x-2">
                     <button
                         onClick={onOpenLanguageSelector}
-                        className="p-2 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+                        className="p-2 rounded-full text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/10 transition-colors"
                         aria-label="Select language"
                     >
                         <GlobeAmericasIcon className="w-6 h-6" />
@@ -93,7 +93,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle, isMenuOpen, active
                     <div className="relative" ref={notificationsRef}>
                         <button
                             onClick={toggleNotifications}
-                            className="p-2 rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+                            className="p-2 rounded-full text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/10 transition-colors"
                             aria-label="View notifications"
                         >
                             <BellIcon className="w-6 h-6" />
@@ -108,7 +108,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle, isMenuOpen, active
                     <div className="relative" ref={profileDropdownRef}>
                         <button 
                             onClick={() => setIsProfileDropdownOpen(prev => !prev)} 
-                            className="rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-white" 
+                            className="rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-100 dark:focus:ring-offset-slate-800 focus:ring-primary"
                             aria-label="Open user menu"
                             aria-haspopup="true"
                             aria-expanded={isProfileDropdownOpen}

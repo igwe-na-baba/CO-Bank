@@ -140,19 +140,19 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({ isOpen, onClose, activeView,
             />
             {/* Menu Panel */}
             <div
-                className={`fixed inset-y-0 left-0 w-full max-w-md bg-slate-800/95 backdrop-blur-lg shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+                className={`fixed inset-y-0 left-0 w-full max-w-md bg-slate-100/95 dark:bg-slate-800/95 backdrop-blur-lg shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="megamenu-title"
             >
                 <div className="h-full flex flex-col">
                     {/* Header */}
-                    <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-white/10">
+                    <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-slate-200 dark:border-white/10">
                         <div className="flex items-center space-x-2">
                             <ICreditUnionLogo />
-                            <h2 id="megamenu-title" className="text-xl font-bold text-white">iCredit Union®</h2>
+                            <h2 id="megamenu-title" className="text-xl font-bold text-slate-800 dark:text-white">iCredit Union®</h2>
                         </div>
-                        <button onClick={onClose} className="p-2 rounded-full text-slate-300 hover:bg-white/10 transition-colors" aria-label="Close menu">
+                        <button onClick={onClose} className="p-2 rounded-full text-slate-500 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors" aria-label="Close menu">
                             <XIcon className="w-6 h-6" />
                         </button>
                     </div>
@@ -160,12 +160,12 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({ isOpen, onClose, activeView,
                     {/* User Profile */}
                     <button
                         onClick={() => handleItemClick('security')}
-                        className="p-4 border-b border-white/10 flex items-center space-x-3 w-full text-left hover:bg-primary/10 transition-colors group"
+                        className="p-4 border-b border-slate-200 dark:border-white/10 flex items-center space-x-3 w-full text-left hover:bg-primary-50 dark:hover:bg-primary/10 transition-colors group"
                     >
                         <img src={userProfile.profilePictureUrl} alt="User Profile" className="w-12 h-12 rounded-full transition-transform duration-300 group-hover:scale-105" />
                         <div>
-                            <p className="font-bold text-white transition-colors duration-300 group-hover:text-primary-300">{userProfile.name}</p>
-                            <p className="text-sm text-slate-400">{userProfile.email}</p>
+                            <p className="font-bold text-slate-800 dark:text-white transition-colors duration-300 group-hover:text-primary-600 dark:group-hover:text-primary-300">{userProfile.name}</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">{userProfile.email}</p>
                         </div>
                     </button>
 
@@ -174,7 +174,7 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({ isOpen, onClose, activeView,
                         <ul className="space-y-6">
                             {menuConfig.map(category => (
                                 <li key={category.category}>
-                                    <h3 className="px-2 mb-2 text-sm font-bold text-slate-400 uppercase tracking-wider">{category.category}</h3>
+                                    <h3 className="px-2 mb-2 text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{category.category}</h3>
                                     <ul className="space-y-1">
                                         {category.items.map(item => {
                                             const Icon = item.icon;
@@ -183,14 +183,14 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({ isOpen, onClose, activeView,
                                                 <li key={item.view}>
                                                     <button
                                                         onClick={() => handleItemClick(item.view)}
-                                                        className={`w-full group flex items-start space-x-3 p-3 rounded-lg text-left transition-all duration-200 ${isActive ? 'bg-primary/20 text-primary-300' : 'hover:bg-primary/10 hover:text-primary-300'}`}
+                                                        className={`w-full group flex items-start space-x-3 p-3 rounded-lg text-left transition-all duration-200 ${isActive ? 'bg-primary-100 dark:bg-primary/20 text-primary-600 dark:text-primary-300' : 'text-slate-700 dark:text-slate-200 hover:bg-primary-50 dark:hover:bg-primary/10 hover:text-primary-600 dark:hover:text-primary-300'}`}
                                                     >
-                                                        <div className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg transition-colors duration-200 ${isActive ? 'bg-primary/20 text-primary-300' : 'bg-white/5 text-slate-300 group-hover:bg-primary/20 group-hover:text-primary-300'}`}>
+                                                        <div className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg transition-colors duration-200 ${isActive ? 'bg-primary/20 text-primary-600 dark:text-primary-300' : 'bg-slate-200 dark:bg-white/5 text-slate-500 dark:text-slate-300 group-hover:bg-primary-100 dark:group-hover:bg-primary/20 group-hover:text-primary-600 dark:group-hover:text-primary-300'}`}>
                                                             <Icon className="w-5 h-5" />
                                                         </div>
                                                         <div>
                                                             <p className="font-semibold">{item.label}</p>
-                                                            <p className={`text-xs ${isActive ? 'text-slate-300' : 'text-slate-400 group-hover:text-slate-300'}`}>{item.description}</p>
+                                                            <p className={`text-xs ${isActive ? 'text-slate-500 dark:text-slate-300' : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-500 dark:group-hover:text-slate-300'}`}>{item.description}</p>
                                                         </div>
                                                     </button>
                                                 </li>

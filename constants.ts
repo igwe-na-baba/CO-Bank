@@ -848,6 +848,7 @@ export const NEW_USER_PROFILE_TEMPLATE: UserProfile = {
 export const INITIAL_PLATFORM_SETTINGS: PlatformSettings = {
     hapticsEnabled: true,
     theme: 'blue',
+    themeMode: 'dark',
 };
 
 export const THEME_COLORS: { [key in PlatformTheme]: { [key: string]: string } } = {

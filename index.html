@@ -26,7 +26,6 @@
         font-family: 'Inter', sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        color: #e2e8f0; /* Default light text color (slate-200) */
         position: relative;
         overflow-x: hidden;
       }
@@ -207,8 +206,19 @@
         border-color: #d9534f;
       }
     </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://esm.sh/react@18.3.1",
+          "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+          "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+          "@google/genai": "https://esm.sh/@google/genai@0.14.0"
+        }
+      }
+    </script>
     <script>
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
             colors: {
@@ -227,8 +237,10 @@
               },
             },
             boxShadow: {
-              'digital': '7px 7px 14px #1b2030, -7px -7px 14px #29304a',
-              'digital-inset': 'inset 7px 7px 14px #1b2030, inset -7px -7px 14px #29304a',
+              'digital-light': '7px 7px 14px #d1d9e6, -7px -7px 14px #ffffff',
+              'digital-light-inset': 'inset 7px 7px 14px #d1d9e6, inset -7px -7px 14px #ffffff',
+              'digital-dark': '7px 7px 14px #1b2030, -7px -7px 14px #29304a',
+              'digital-dark-inset': 'inset 7px 7px 14px #1b2030, inset -7px -7px 14px #29304a',
             },
             animation: {
               'pop-in': 'pop-in 0.4s ease-out forwards',
@@ -311,16 +323,6 @@
           }
         }
       }
-    </script>
-    <script type="importmap">
-    {
-      "imports": {
-        "react": "https://esm.sh/react@18.3.1",
-        "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-        "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
-        "@google/genai": "https://esm.sh/@google/genai@0.14.0"
-      }
-    }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>

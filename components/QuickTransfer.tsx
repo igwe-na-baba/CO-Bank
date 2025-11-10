@@ -105,39 +105,39 @@ export const QuickTransfer: React.FC<QuickTransferProps> = ({ accounts, recipien
         return (
             <button
                 onClick={() => setSelectedRecipientId(recipient.id)}
-                className={`flex flex-col items-center space-y-2 p-2 rounded-lg transition-all duration-200 w-24 ${isSelected ? 'bg-slate-900/50 shadow-digital-inset' : 'bg-slate-800/60 shadow-digital active:shadow-digital-inset'}`}
+                className={`flex flex-col items-center space-y-2 p-2 rounded-lg transition-all duration-200 w-24 ${isSelected ? 'bg-slate-900/50 dark:bg-slate-900/50 shadow-digital-light-inset dark:shadow-digital-dark-inset' : 'bg-slate-800/60 dark:bg-slate-800/60 shadow-digital-light dark:shadow-digital-dark active:shadow-digital-light-inset dark:active:shadow-digital-dark-inset'}`}
                 aria-label={`Select ${recipient.fullName}`}
                 aria-pressed={isSelected}
             >
-                <div className={`w-12 h-12 rounded-full bg-slate-700/50 flex-shrink-0 flex items-center justify-center text-slate-300 shadow-inner relative ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-slate-800/60' : ''}`}>
+                <div className={`w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-700/50 flex-shrink-0 flex items-center justify-center text-slate-800 dark:text-slate-300 shadow-inner relative ${isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-slate-100 dark:ring-offset-slate-800/60' : ''}`}>
                     {recipient.id === SELF_RECIPIENT.id ? <UserCircleIcon className="w-8 h-8" /> : <BankIconComponent className="w-8 h-8" />}
                 </div>
-                <p className="text-xs font-semibold text-slate-300 truncate">{recipient.nickname || recipient.fullName}</p>
+                <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 truncate">{recipient.nickname || recipient.fullName}</p>
             </button>
         );
     };
 
     return (
-        <div className="bg-slate-700/50 rounded-2xl shadow-digital">
-            <div className="p-6 border-b border-slate-700">
-                <h2 className="text-xl font-bold text-slate-100">Quick Transfer</h2>
+        <div className="bg-white dark:bg-slate-700/50 rounded-2xl shadow-digital-light dark:shadow-digital-dark">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Quick Transfer</h2>
             </div>
             <div className="p-6 space-y-4">
                 {status === 'success' ? (
                      <div className="text-center p-8 flex flex-col items-center justify-center">
-                        <CheckCircleIcon className="w-16 h-16 text-green-400 mb-4" />
-                        <h3 className="text-lg font-bold text-slate-100">Transfer Submitted!</h3>
-                        <p className="text-sm text-slate-400">Your funds are on their way.</p>
+                        <CheckCircleIcon className="w-16 h-16 text-green-500 dark:text-green-400 mb-4" />
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Transfer Submitted!</h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Your funds are on their way.</p>
                     </div>
                 ) : (
                     <>
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-1">From</label>
+                            <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">From</label>
                              <select
                                 id="sourceAccount"
                                 value={sourceAccountId}
                                 onChange={e => setSourceAccountId(e.target.value)}
-                                className="w-full bg-slate-800/50 border border-slate-600 text-slate-100 p-3 rounded-md shadow-inner focus:ring-2 focus:ring-primary-400"
+                                className="w-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-100 p-3 rounded-md shadow-inner focus:ring-2 focus:ring-primary-400"
                                 disabled={status === 'sending'}
                             >
                                 {availableAccounts.map(acc => (
@@ -148,38 +148,38 @@ export const QuickTransfer: React.FC<QuickTransferProps> = ({ accounts, recipien
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">To</label>
+                            <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">To</label>
                             <div className="flex space-x-3 overflow-x-auto pb-2 -mx-2 px-2">
                                 {quickRecipients.map(rec => <RecipientAvatar key={rec.id} recipient={rec} />)}
                             </div>
                         </div>
                         <div>
-                            <label htmlFor="quick-amount" className="block text-sm font-medium text-slate-300 mb-1">Amount</label>
-                            <div className="mt-1 relative rounded-md shadow-inner bg-slate-800/50 border border-slate-600">
+                            <label htmlFor="quick-amount" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">Amount</label>
+                            <div className="mt-1 relative rounded-md shadow-inner bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-600">
                                 <input
                                     type="number"
                                     id="quick-amount"
                                     value={amount}
                                     onChange={e => setAmount(e.target.value)}
-                                    className="w-full bg-transparent border-0 p-3 pr-16 text-slate-100"
+                                    className="w-full bg-transparent border-0 p-3 pr-16 text-slate-800 dark:text-slate-100"
                                     placeholder="0.00"
                                     disabled={status === 'sending'}
                                 />
                                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <span className="text-slate-400 font-semibold">USD</span>
+                                    <span className="text-slate-500 dark:text-slate-400 font-semibold">USD</span>
                                 </div>
                             </div>
-                            {amountError && <p className="mt-1 text-xs text-red-400">{amountError}</p>}
-                            {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+                            {amountError && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{amountError}</p>}
+                            {error && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{error}</p>}
                         </div>
-                         <div className="p-3 bg-slate-800/50 rounded-lg shadow-inner text-sm space-y-1">
+                         <div className="p-3 bg-slate-100 dark:bg-slate-800/50 rounded-lg shadow-inner text-sm space-y-1">
                             <div className="flex justify-between">
-                                <span className="text-slate-400">Fee</span>
-                                <span className="font-mono text-slate-200">{STANDARD_FEE.toFixed(2)} USD</span>
+                                <span className="text-slate-500 dark:text-slate-400">Fee</span>
+                                <span className="font-mono text-slate-600 dark:text-slate-200">{STANDARD_FEE.toFixed(2)} USD</span>
                             </div>
                             <div className="flex justify-between font-semibold">
-                                <span className="text-slate-400">Total</span>
-                                <span className="font-mono text-slate-200">{totalCost.toFixed(2)} USD</span>
+                                <span className="text-slate-500 dark:text-slate-400">Total</span>
+                                <span className="font-mono text-slate-700 dark:text-slate-200">{totalCost.toFixed(2)} USD</span>
                             </div>
                          </div>
                         <div className="relative">

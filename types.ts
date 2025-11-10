@@ -441,6 +441,7 @@ export type PlatformTheme = 'blue' | 'green' | 'purple';
 export interface PlatformSettings {
   hapticsEnabled: boolean;
   theme: PlatformTheme;
+  themeMode?: 'light' | 'dark';
 }
 
 // Task Management

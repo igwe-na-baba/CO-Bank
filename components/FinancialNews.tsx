@@ -5,12 +5,12 @@ import { ALL_COUNTRIES } from '../constants';
 import { SpinnerIcon, InfoIcon, StarIcon, LightBulbIcon } from './Icons';
 
 const NewsArticleCard: React.FC<{ article: NewsArticle }> = ({ article }) => (
-    <div className="p-4 rounded-lg shadow-inner bg-slate-800/50 border border-slate-700">
-        <span className="inline-block bg-primary-500/20 text-primary-300 text-xs font-semibold px-2 py-1 rounded-full mb-2">
+    <div className="p-4 rounded-lg shadow-inner bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+        <span className="inline-block bg-primary-500/10 dark:bg-primary-500/20 text-primary-700 dark:text-primary-300 text-xs font-semibold px-2 py-1 rounded-full mb-2">
             {article.category}
         </span>
-        <h4 className="font-bold text-slate-100 mb-1">{article.title}</h4>
-        <p className="text-sm text-slate-400">{article.summary}</p>
+        <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-1">{article.title}</h4>
+        <p className="text-sm text-slate-600 dark:text-slate-400">{article.summary}</p>
     </div>
 );
 
@@ -31,10 +31,10 @@ const AdCard: React.FC = () => (
 
 
 const NewsSkeletonLoader: React.FC = () => (
-    <div className="p-4 rounded-lg shadow-inner bg-slate-800/50 border border-slate-700 animate-pulse">
-        <div className="h-4 bg-slate-700 rounded w-1/3 mb-3"></div>
-        <div className="h-5 bg-slate-700 rounded w-full mb-2"></div>
-        <div className="h-4 bg-slate-700 rounded w-4/5"></div>
+    <div className="p-4 rounded-lg shadow-inner bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 animate-pulse">
+        <div className="h-4 bg-slate-300 dark:bg-slate-700 rounded w-1/3 mb-3"></div>
+        <div className="h-5 bg-slate-300 dark:bg-slate-700 rounded w-full mb-2"></div>
+        <div className="h-4 bg-slate-300 dark:bg-slate-700 rounded w-4/5"></div>
     </div>
 );
 
@@ -86,9 +86,9 @@ export const FinancialNews: React.FC = () => {
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            <div className="lg:col-span-2 bg-slate-700/50 rounded-2xl shadow-digital">
-                <div className="p-6 border-b border-slate-700">
-                    <h2 className="text-xl font-bold text-slate-100">Market Insights & News</h2>
+            <div className="lg:col-span-2 bg-white dark:bg-slate-700/50 rounded-2xl shadow-digital-light dark:shadow-digital-dark">
+                <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+                    <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Market Insights & News</h2>
                 </div>
                 <div className="p-6">
                     {isLoadingNews ? (
@@ -98,7 +98,7 @@ export const FinancialNews: React.FC = () => {
                            <NewsSkeletonLoader />
                         </div>
                     ) : isNewsError ? (
-                        <div className="flex items-center space-x-3 text-yellow-300 bg-yellow-500/10 p-4 rounded-lg shadow-inner">
+                        <div className="flex items-center space-x-3 text-yellow-800 dark:text-yellow-300 bg-yellow-100 dark:bg-yellow-500/10 p-4 rounded-lg shadow-inner">
                             <InfoIcon className="w-6 h-6" />
                             <p>Could not load financial news at this time. Please try again later.</p>
                         </div>
@@ -112,21 +112,21 @@ export const FinancialNews: React.FC = () => {
                 </div>
                 
                 {/* NEW "Did You Know?" Section */}
-                <div className="p-6 border-t border-slate-700">
+                <div className="p-6 border-t border-slate-200 dark:border-slate-700">
                     <div className="flex items-center space-x-3 mb-4">
                         <LightBulbIcon className="w-6 h-6 text-yellow-400" />
-                        <h3 className="text-lg font-bold text-slate-100">Did You Know?</h3>
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Did You Know?</h3>
                     </div>
                     
                     <div className="flex flex-col sm:flex-row items-center gap-4 mb-4">
-                        <label htmlFor="country-tip-select" className="text-sm font-medium text-slate-300 flex-shrink-0">
+                        <label htmlFor="country-tip-select" className="text-sm font-medium text-slate-600 dark:text-slate-300 flex-shrink-0">
                             Get transfer tips for:
                         </label>
                         <select
                             id="country-tip-select"
                             value={selectedCountryCode}
                             onChange={(e) => setSelectedCountryCode(e.target.value)}
-                            className="w-full sm:w-auto bg-slate-800/50 border border-slate-600 text-slate-100 p-2 rounded-md shadow-inner focus:ring-2 focus:ring-primary-400"
+                            className="w-full sm:w-auto bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-100 p-2 rounded-md shadow-inner focus:ring-2 focus:ring-primary-400"
                         >
                             {ALL_COUNTRIES.map((country: Country) => (
                                 <option key={country.code} value={country.code}>
@@ -136,7 +136,7 @@ export const FinancialNews: React.FC = () => {
                         </select>
                     </div>
 
-                    <div className={`p-4 rounded-lg flex items-start space-x-3 shadow-inner ${isTipError ? 'bg-yellow-500/10 text-yellow-300' : 'bg-primary-500/10 text-primary-300'}`}>
+                    <div className={`p-4 rounded-lg flex items-start space-x-3 shadow-inner ${isTipError ? 'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-800 dark:text-yellow-300' : 'bg-primary-50 dark:bg-primary-500/10 text-primary-800 dark:text-primary-300'}`}>
                         {isTipLoading ? (
                             <SpinnerIcon className="w-5 h-5 mt-0.5 flex-shrink-0" />
                         ) : (

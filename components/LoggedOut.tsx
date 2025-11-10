@@ -1,7 +1,8 @@
 import React from 'react';
 import { UserProfile } from '../types';
 // FIX: Renamed ApexBankLogo to ICreditUnionLogo to fix the import error.
-import { ICreditUnionLogo } from './Icons';
+import { ICreditUnionLogo, MapPinIcon, ClockIcon } from './Icons';
+import { timeSince } from '../utils/time';
 
 // FIX: Define the LoggedOutProps interface.
 interface LoggedOutProps {
