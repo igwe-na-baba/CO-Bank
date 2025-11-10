@@ -1,3 +1,3 @@
-// This file is intentionally left blank to resolve a file-casing conflict.
-// The correct component is located at 'Tasks.tsx'.
+// This file is intentionally left blank to resolve a module resolution conflict.
+// All imports should point to 'components/Tasks.tsx'.
 export {};

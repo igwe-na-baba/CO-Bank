@@ -176,7 +176,6 @@ const TransactionRow: React.FC<{
 
 export const ActivityLog: React.FC<ActivityLogProps> = ({ 
     transactions, 
-    onUpdateTransactions: _onUpdateTransactions, 
     onRepeatTransaction,
     onAuthorizeTransaction,
     accounts,

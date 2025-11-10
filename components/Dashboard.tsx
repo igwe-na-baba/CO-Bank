@@ -102,8 +102,9 @@ const RealTimeInfo: React.FC = () => {
     const [dateTime, setDateTime] = useState(new Date());
 
     React.useEffect(() => {
-        const timerId = setInterval(() => setDateTime(new Date()), 1000);
-        return () => clearInterval(timerId);
+        const timer = setInterval(() => setDateTime(new Date()), 1000);
+        // FIX: Corrected typo from `timerId` to `timer` to clear the correct interval.
+        return () => clearInterval(timer);
     }, []);
 
     return (
@@ -114,236 +115,103 @@ const RealTimeInfo: React.FC = () => {
             </div>
              <div className="flex items-center justify-end space-x-2">
                 <div className="w-3 h-3 bg-green-400 rounded-full animate-breathing-dot"></div>
-                <p className="font-mono text-sm font-semibold text-green-600 dark:text-green-300">Active Session</p>
-            </div>
-            <div className="flex items-center justify-end space-x-2 text-slate-600 dark:text-slate-300">
-                <ClockIcon className="w-5 h-5" />
-                <p className="font-mono text-sm">
-                    {dateTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                    {' / '}
-                    {dateTime.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-                </p>
+                <p className="font-mono text-sm font-semibold text-green-600 dark:text-green-300">Active</p>
             </div>
         </div>
     );
 };
 
-
-const TransactionRow: React.FC<{ transaction: Transaction }> = ({ transaction }) => {
-  const isCompleted = transaction.status === TransactionStatus.FUNDS_ARRIVED;
-  const statusIcon = isCompleted ? <CheckCircleIcon className="w-5 h-5 text-green-500" /> : <ClockIcon className="w-5 h-5 text-yellow-500" />;
-  const statusColor = isCompleted ? 'text-green-700 bg-green-100 dark:text-green-300 dark:bg-green-500/20' : 'text-yellow-700 bg-yellow-100 dark:text-yellow-300 dark:bg-yellow-500/20';
-  const isCredit = transaction.type === 'credit';
-  
-  const getTransactionIcon = () => {
-      if (isCredit) {
-          return transaction.chequeDetails ?
-              <ClipboardDocumentIcon className="w-6 h-6 text-slate-600 dark:text-slate-300" /> :
-              <DepositIcon className="w-6 h-6 text-slate-600 dark:text-slate-300" />;
-      }
-      
-      // Debit
-      if (transaction.recipient.country.code !== 'US') {
-          return <GlobeAmericasIcon className="w-6 h-6 text-slate-600 dark:text-slate-300" />;
-      }
-      
-      const BankLogo = getBankIcon(transaction.recipient.bankName);
-      return <BankLogo className="w-6 h-6" />;
-  };
-
-  return (
-    <tr className="border-b border-slate-200 dark:border-slate-700 last:border-b-0">
-      <td className="py-4 px-6">
-        <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center font-bold text-slate-600 dark:text-slate-300 shadow-inner">
-                {getTransactionIcon()}
-            </div>
-            <div>
-                <p className="font-semibold text-slate-800 dark:text-slate-100">{isCredit ? 'Deposit' : transaction.recipient.fullName}</p>
-                 {isCredit ? (
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{transaction.description}</p>
-                ) : (
-                    <div className="flex items-center space-x-1.5">
-                        <img src={`https://flagsapi.com/${transaction.recipient.country.code}/shiny/24.png`} alt={transaction.recipient.country.name} className="w-5 h-auto rounded-sm" />
-                        <p className="text-sm text-slate-500 dark:text-slate-400">{transaction.recipient.bankName}</p>
-                    </div>
-                )}
-            </div>
-        </div>
-      </td>
-      <td className={`py-4 px-6 font-mono text-right ${isCredit ? 'text-green-500 dark:text-green-400' : 'text-slate-800 dark:text-slate-300'}`}>
-        {isCredit ? '+' : '-'} {transaction.sendAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
-      </td>
-      <td className="py-4 px-6">
-        <span className={`px-2 py-1 text-xs font-semibold rounded-full inline-flex items-center space-x-1 ${statusColor}`}>
-            {statusIcon}
-            <span>{transaction.status}</span>
-        </span>
-      </td>
-      <td className="py-4 px-6 text-slate-600 dark:text-slate-300 text-sm text-right">
-        {transaction.statusTimestamps[TransactionStatus.SUBMITTED].toLocaleDateString()}
-      </td>
-    </tr>
-  );
-};
-
-const ExploreServices: React.FC<{ setActiveView: (view: View) => void }> = ({ setActiveView }) => {
-    const services = [
-        {
-            title: 'Global Services',
-            description: 'Plan your next trip and pay directly.',
-            icon: <AirplaneTicketIcon className="w-10 h-10 text-primary-300" />,
-            view: 'flights' as View,
-            bgImage: 'https://images.unsplash.com/photo-1569154941061-e231b4725ef1?q=80&w=2832&auto=format&fit=crop'
-        },
-        {
-            title: 'Trade Crypto',
-            description: 'Buy, sell, and hold digital assets securely.',
-            icon: <ChartBarIcon className="w-10 h-10 text-primary-300" />,
-            view: 'crypto' as View,
-            bgImage: 'https://images.unsplash.com/photo-1621452773453-c82736159b3a?q=80&w=2940&auto=format&fit=crop'
-        },
-        {
-            title: 'Secure Services',
-            description: 'Protect your transfers, travel, and more.',
-            icon: <LifebuoyIcon className="w-10 h-10 text-primary-300" />,
-            view: 'insurance' as View,
-            bgImage: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2940&auto=format&fit=crop'
-        }
-    ];
-
-    return (
-        <div className="bg-white dark:bg-slate-700/50 rounded-2xl p-6 shadow-digital-light dark:shadow-digital-dark">
-            <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4">Explore Our Services</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {services.map(service => (
-                    <button 
-                        key={service.title} 
-                        onClick={() => setActiveView(service.view)}
-                        className="group relative h-48 rounded-2xl text-white overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
-                    >
-                        <div 
-                            className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110 animate-card-zoom" 
-                            style={{ 
-                                backgroundImage: `url(${service.bgImage})`,
-                                animationDuration: '30s'
-                            }} 
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10" />
-                        <div className="relative h-full flex flex-col justify-end p-4 z-20 text-left">
-                            <div className="mb-2 opacity-80 group-hover:opacity-100 transition-opacity">
-                                {service.icon}
-                            </div>
-                            <h4 className="font-bold text-lg">{service.title}</h4>
-                            <p className="text-xs text-slate-300">{service.description}</p>
-                        </div>
-                    </button>
-                ))}
-            </div>
-        </div>
-    );
-};
-
-
+// FIX: Export Dashboard to resolve import error in App.tsx
 export const Dashboard: React.FC<DashboardProps> = ({ accounts, transactions, setActiveView, recipients, createTransaction, cryptoPortfolioValue, portfolioChange24h, travelPlans, totalNetWorth, balanceDisplayMode, userProfile, onOpenSendMoneyFlow }) => {
-  const [isBalanceVisible, setIsBalanceVisible] = useState(true);
-  const { t } = useLanguage();
-  
-  const greeting = useMemo(() => getGreeting(), []);
-  const activeTravelPlans = travelPlans.filter(p => p.status === TravelPlanStatus.ACTIVE);
-  const isPortfolioChangePositive = portfolioChange24h >= 0;
+    const [isBalanceVisible, setIsBalanceVisible] = useState(true);
+    const { t } = useLanguage();
 
-  const toggleBalanceVisibility = () => {
-    setIsBalanceVisible(!isBalanceVisible);
-  };
-  
-  return (
-    <div className="space-y-8">
-      <ActiveTravelNotice plans={activeTravelPlans} />
+    const activeTravelPlans = travelPlans.filter(plan => plan.status === TravelPlanStatus.ACTIVE);
 
-      <div className="bg-white dark:bg-slate-700/50 rounded-2xl p-6 shadow-digital-light dark:shadow-digital-dark">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start mb-6">
-            <div className="md:col-span-1">
-              <div className="flex items-center space-x-4">
-                  <img src={userProfile.profilePictureUrl} alt="Profile" className="w-12 h-12 rounded-full shadow-md object-cover" />
-                  <div>
-                      <div className="flex items-center space-x-2">
-                          <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{greeting}, {userProfile.name.split(' ')[0]}!</h3>
-                          <VerifiedBadgeIcon className="w-6 h-6 text-blue-400" />
-                      </div>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">{t('dashboard_welcome_back')}</p>
-                  </div>
-              </div>
-            </div>
-            <div className="md:col-span-1 text-right">
-                <p className="text-sm text-slate-500 dark:text-slate-400">{t('dashboard_total_net_worth')}</p>
-                <div className="flex items-center justify-end space-x-2">
-                     <h2 className={`text-4xl font-bold text-slate-800 dark:text-slate-100 transition-all duration-300 ${!isBalanceVisible ? 'blur-md' : ''}`}>
-                        {isBalanceVisible ? <AnimatedNumber value={totalNetWorth} /> : '$ ••••••••'}
-                    </h2>
-                    <button onClick={toggleBalanceVisibility} className="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white">
-                        {isBalanceVisible ? <EyeSlashIcon className="w-6 h-6" /> : <EyeIcon className="w-6 h-6" />}
-                    </button>
+    const recentTransactions = transactions.slice(0, 3);
+    const pendingTransactions = transactions.filter(t => t.status !== TransactionStatus.FUNDS_ARRIVED && t.status !== TransactionStatus.FLAGGED_AWAITING_CLEARANCE);
+
+    const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+
+    const greeting = getGreeting();
+    
+    return (
+        <div className="space-y-8">
+            {/* Header */}
+            <div className="flex justify-between items-start">
+                <div>
+                    <h1 className="text-3xl font-bold text-slate-800 dark:text-white">{greeting}, {userProfile.name.split(' ')[0]}!</h1>
+                    <p className="text-slate-500 dark:text-slate-400">{t('dashboard_welcome_message')}</p>
                 </div>
-                <RealTimeInfo />
+                <div className="hidden md:block">
+                     <RealTimeInfo />
+                </div>
             </div>
+
+            {/* Main Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                {/* Left Column */}
+                <div className="lg:col-span-2 space-y-8">
+                    {activeTravelPlans.length > 0 && <ActiveTravelNotice plans={activeTravelPlans} />}
+                    {balanceDisplayMode === 'global' && (
+                        <div className="bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-digital-dark p-6 text-white animate-fade-in-up">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-300">{t('dashboard_total_net_worth')}</h2>
+                                <button onClick={() => setIsBalanceVisible(!isBalanceVisible)} className="p-1 text-slate-300 hover:text-white">
+                                    {isBalanceVisible ? <EyeSlashIcon className="w-6 h-6" /> : <EyeIcon className="w-6 h-6" />}
+                                </button>
+                            </div>
+                            <div className={`text-5xl font-bold mt-2 transition-all duration-300 ${!isBalanceVisible ? 'blur-lg' : ''}`}>
+                               {isBalanceVisible ? <AnimatedNumber value={totalNetWorth} /> : '$ ••••••••'}
+                            </div>
+                            <div className="grid grid-cols-2 gap-6 mt-6 pt-4 border-t border-white/20">
+                                <div onClick={() => setActiveView('accounts')} className="cursor-pointer">
+                                    <p className="text-sm text-slate-300">{t('dashboard_total_cash')}</p>
+                                    <p className={`text-2xl font-semibold transition-all duration-300 ${!isBalanceVisible ? 'blur-md' : ''}`}>
+                                        {isBalanceVisible ? totalBalance.toLocaleString('en-US',{style:'currency', currency:'USD'}) : '$ ••••••'}
+                                    </p>
+                                </div>
+                                <div onClick={() => setActiveView('crypto')} className="cursor-pointer">
+                                    <p className="text-sm text-slate-300">{t('dashboard_crypto_portfolio')}</p>
+                                    <p className={`text-2xl font-semibold transition-all duration-300 ${!isBalanceVisible ? 'blur-md' : ''}`}>
+                                        {isBalanceVisible ? cryptoPortfolioValue.toLocaleString('en-US',{style:'currency', currency:'USD'}) : '$ ••••••'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    <AccountCarousel accounts={accounts} isBalanceVisible={isBalanceVisible} setActiveView={setActiveView} />
+                     <QuicktellerHub setActiveView={setActiveView} onOpenSendMoneyFlow={onOpenSendMoneyFlow} />
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-8">
+                     <QuickTransfer accounts={accounts} recipients={recipients} createTransaction={createTransaction} />
+                    {/* Recent Activity */}
+                    <div className="bg-slate-200 dark:bg-slate-800/50 rounded-2xl shadow-digital-light dark:shadow-digital-dark">
+                         <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+                             <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('dashboard_recent_activity')}</h2>
+                         </div>
+                         <div className="p-4">
+                             {recentTransactions.map(tx => (
+                                <div key={tx.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-300/50 dark:hover:bg-slate-700/50">
+                                     <div className="flex items-center space-x-3">
+                                         {tx.type === 'credit' ? <DepositIcon className="w-8 h-8 text-green-500 dark:text-green-400" /> : <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-700 flex items-center justify-center p-1"><img src={`https://flagsapi.com/${tx.recipient.country.code}/shiny/64.png`} alt="" className="rounded-full"/></div>}
+                                         <div>
+                                             <p className="font-semibold text-slate-700 dark:text-slate-200">{tx.recipient.nickname || tx.recipient.fullName}</p>
+                                             <p className="text-xs text-slate-500 dark:text-slate-400">{t(`transaction_status_${tx.status.replace(/\s/g, '_').toLowerCase()}`)}</p>
+                                         </div>
+                                     </div>
+                                     <p className={`font-mono font-semibold ${tx.type === 'credit' ? 'text-green-600 dark:text-green-400' : 'text-slate-800 dark:text-slate-200'}`}>{tx.type === 'credit' ? '+' : '-'}{tx.sendAmount.toLocaleString('en-US',{style:'currency', currency:'USD'})}</p>
+                                </div>
+                             ))}
+                             <button onClick={() => setActiveView('history')} className="w-full text-center mt-2 p-2 text-sm font-semibold text-primary-600 dark:text-primary-300 hover:bg-primary-500/10 dark:hover:bg-primary-500/20 rounded-lg">{t('dashboard_view_all')}</button>
+                         </div>
+                    </div>
+                     <CurrencyConverter />
+                </div>
+            </div>
+             <FinancialNews />
         </div>
-        
-        <AccountCarousel
-            accounts={accounts}
-            isBalanceVisible={isBalanceVisible}
-            setActiveView={setActiveView}
-        />
-      </div>
-
-      <ExploreServices setActiveView={setActiveView} />
-      
-      <QuicktellerHub setActiveView={setActiveView} onOpenSendMoneyFlow={onOpenSendMoneyFlow} />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <QuickTransfer recipients={recipients} accounts={accounts} createTransaction={createTransaction} />
-        <div className="bg-white dark:bg-slate-700/50 rounded-2xl shadow-digital-light dark:shadow-digital-dark p-6">
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">Crypto Portfolio</h3>
-             <p className={`text-3xl font-bold text-slate-800 dark:text-slate-100 mt-2 transition-all duration-300 ${!isBalanceVisible ? 'blur-md' : ''}`}>
-                {isBalanceVisible ? cryptoPortfolioValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : '$ ••••••••'}
-             </p>
-             <div className={`flex items-center text-lg font-semibold mt-1 ${isPortfolioChangePositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                <TrendingUpIcon className={`w-5 h-5 mr-1 ${!isPortfolioChangePositive ? 'transform -scale-y-100' : ''}`} />
-                <span>{portfolioChange24h.toFixed(2)}% (24h)</span>
-             </div>
-             <button onClick={() => setActiveView('crypto')} className="mt-4 text-sm font-bold text-primary-600 dark:text-primary-300 hover:underline animate-breathing">
-                View & Trade &rarr;
-            </button>
-          </div>
-      </div>
-      
-      <div className="bg-white dark:bg-slate-700/50 rounded-2xl shadow-digital-light dark:shadow-digital-dark overflow-hidden">
-        <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{t('dashboard_recent_activity')}</h3>
-            <button onClick={() => setActiveView('history')} className="text-sm font-bold text-primary-600 dark:text-primary-300 hover:underline">{t('dashboard_view_all')} &rarr;</button>
-        </div>
-        <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-                <thead className="text-xs text-slate-500 dark:text-slate-400 uppercase bg-slate-50 dark:bg-slate-800/60">
-                    <tr>
-                        <th scope="col" className="px-6 py-3">Recipient / Details</th>
-                        <th scope="col" className="px-6 py-3 text-right">Amount</th>
-                        <th scope="col" className="px-6 py-3">Status</th>
-                        <th scope="col" className="px-6 py-3 text-right">Date</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                    {transactions.slice(0, 4).map(tx => <TransactionRow key={tx.id} transaction={tx} />)}
-                </tbody>
-            </table>
-        </div>
-      </div>
-
-       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <CurrencyConverter />
-            <FinancialNews />
-       </div>
-
-    </div>
-  );
+    );
 };

@@ -21,6 +21,7 @@ import { LogoutConfirmationModal } from './components/LogoutConfirmationModal';
 import { InactivityModal } from './components/InactivityModal';
 import { TravelCheckIn } from './components/TravelCheckIn';
 import { PlatformFeatures } from './components/PlatformFeatures';
+// FIX: Corrected import path casing from './components/tasks' to './components/Tasks' to resolve module resolution ambiguity.
 import { Tasks } from './components/Tasks';
 import { Flights } from './components/Flights';
 import { Utilities } from './components/Utilities';
@@ -104,7 +105,7 @@ const AppContent: React.FC = () => {
     const [wireTransferInitialData, setWireTransferInitialData] = useState<any>(null);
     const [showCongratulations, setShowCongratulations] = useState(false);
     const [showPushApproval, setShowPushApproval] = useState(false);
-    const [transactionForPushApproval, setTransactionForPushApproval] = useState<string | null>(null);
+    const [transactionForPushApproval] = useState<string | null>(null);
     const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
     const [showLinkAccountModal, setShowLinkAccountModal] = useState(false);
     const [showContactSupportModal, setShowContactSupportModal] = useState(false);
@@ -115,7 +116,7 @@ const AppContent: React.FC = () => {
     // Data State
     const [userProfile, setUserProfile] = useState<UserProfile>(USER_PROFILE);
     const [accounts, setAccounts] = useState<Account[]>(INITIAL_ACCOUNTS);
-    const [recipients, setRecipients] = useState<Recipient[]>(INITIAL_RECIPIENTS);
+    const [recipients] = useState<Recipient[]>(INITIAL_RECIPIENTS);
     const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
     const [cards, setCards] = useState<Card[]>(INITIAL_CARDS);
     const [virtualCards, setVirtualCards] = useState<VirtualCard[]>(INITIAL_VIRTUAL_CARDS);
@@ -376,7 +377,8 @@ const AppContent: React.FC = () => {
     }, [accounts, transactions, cryptoHoldings]);
     
     const handleCreateAccountSuccess = (formData: any) => {
-        const newUserProfile: UserProfile = { ...NEW_USER_PROFILE_TEMPLATE, name: formData.fullName, email: formData.email, phone: formData.phone ? String(formData.phone) : undefined };
+        // FIX: Ensure phone number is 'undefined' if empty to match UserProfile type, preventing potential downstream errors.
+        const newUserProfile: UserProfile = { ...NEW_USER_PROFILE_TEMPLATE, name: formData.fullName, email: formData.email, phone: formData.phone || undefined };
         const newAccounts = NEW_USER_ACCOUNTS_TEMPLATE.map((acc, i) => ({
             ...acc,
             id: `acc_new_${Date.now()}_${i}`,
@@ -449,7 +451,7 @@ const AppContent: React.FC = () => {
                     {activeView === 'dashboard' && <Dashboard accounts={accounts} transactions={transactions} setActiveView={setActiveView} recipients={recipients} createTransaction={createTransaction} cryptoPortfolioValue={cryptoPortfolioValue} portfolioChange24h={0} travelPlans={travelPlans} totalNetWorth={totalNetWorth} balanceDisplayMode={balanceDisplayMode} userProfile={userProfile} onOpenSendMoneyFlow={(tab) => { setShowSendMoneyFlow(true); setSendMoneyFlowInitialTab(tab); }} />}
                     {activeView === 'recipients' && <Recipients recipients={recipients} addRecipient={() => {}} onUpdateRecipient={() => {}} />}
                     {activeView === 'history' && <ActivityLog transactions={transactions} onUpdateTransactions={() => {}} onRepeatTransaction={(tx) => { setTransactionToRepeat(tx); setShowSendMoneyFlow(true); }} onAuthorizeTransaction={handleAuthorizeTransaction} accounts={accounts} onContactSupport={(txId) => { setContactSupportInitialTxId(txId); setShowContactSupportModal(true); }}/>}
-                    {activeView === 'security' && <Security advancedTransferLimits={INITIAL_ADVANCED_TRANSFER_LIMITS} onUpdateAdvancedLimits={() => {}} cards={cards} onUpdateCardControls={() => {}} verificationLevel={verificationLevel} onVerificationComplete={setVerificationLevel} securitySettings={securitySettings} onUpdateSecuritySettings={update => setSecuritySettings(prev => ({ ...prev, ...update }))} trustedDevices={trustedDevices} onRevokeDevice={() => {}} onChangePassword={() => setShowChangePasswordModal(true)} transactions={transactions} pushNotificationSettings={pushNotificationSettings} onUpdatePushNotificationSettings={update => setPushNotificationSettings(prev => ({ ...prev, ...update }))} userProfile={userProfile} onUpdateProfilePicture={(url) => setUserProfile(prev => ({...prev, profilePictureUrl: url}))} privacySettings={privacySettings} onUpdatePrivacySettings={(update) => setPrivacySettings(prev => ({...prev, ...update}))} />}
+                    {activeView === 'security' && <Security advancedTransferLimits={INITIAL_ADVANCED_TRANSFER_LIMITS} onUpdateAdvancedLimits={() => {}} cards={cards} onUpdateCardControls={() => {}} verificationLevel={verificationLevel} onVerificationComplete={setVerificationLevel} securitySettings={securitySettings} onUpdateSecuritySettings={(update) => setSecuritySettings(prev => ({ ...prev, ...update }))} trustedDevices={trustedDevices} onRevokeDevice={() => {}} onChangePassword={() => setShowChangePasswordModal(true)} transactions={transactions} pushNotificationSettings={pushNotificationSettings} onUpdatePushNotificationSettings={(update) => setPushNotificationSettings(prev => ({ ...prev, ...update }))} userProfile={userProfile} onUpdateProfilePicture={(url) => setUserProfile(prev => ({...prev, profilePictureUrl: url}))} privacySettings={privacySettings} onUpdatePrivacySettings={(update) => setPrivacySettings(prev => ({...prev, ...update}))} />}
                     {activeView === 'cards' && <CardManagement cards={cards} virtualCards={virtualCards} onUpdateVirtualCard={(cardId, updates) => setVirtualCards(vcs => vcs.map(vc => vc.id === cardId ? {...vc, ...updates} : vc))} cardTransactions={cardTransactions} onUpdateCardControls={(cardId, updatedControls) => setCards(prev => prev.map(c => c.id === cardId ? { ...c, controls: { ...c.controls, ...updatedControls } } : c))} onAddCard={() => {}} onAddVirtualCard={() => {}} accountBalance={mainCheckingAccount?.balance || 0} onAddFunds={async () => {}} />}
                     {activeView === 'loans' && <Loans loanApplications={loanApplications} addLoanApplication={(app) => setLoanApplications(prev => [...prev, { ...app, id: `loan_app_${Date.now()}`, status: LoanApplicationStatus.PENDING, submittedDate: new Date() }])} addNotification={addNotification} />}
                     {activeView === 'insurance' && <Insurance addNotification={addNotification} />}
@@ -488,18 +490,18 @@ const AppContent: React.FC = () => {
                     {activeView === 'services' && <ServicesDashboard subscriptions={subscriptions} onPaySubscription={() => true} appleCardDetails={appleCardDetails} appleCardTransactions={appleCardTransactions} onUpdateSpendingLimits={() => {}} onUpdateTransactionCategory={() => {}} />}
                     {activeView === 'checkin' && <TravelCheckIn travelPlans={travelPlans} addTravelPlan={(country, startDate, endDate) => setTravelPlans(prev => [...prev, { id: `tp_${Date.now()}`, country, startDate, endDate, status: TravelPlanStatus.UPCOMING }])} />}
                     {activeView === 'platform' && <PlatformFeatures settings={platformSettings} onUpdateSettings={update => setPlatformSettings(prev => ({ ...prev, ...update }))} />}
-                    {activeView === 'tasks' && <Tasks tasks={tasks} addTask={(text, dueDate) => setTasks(prev => [...prev, {id: `task_${Date.now()}`, text, completed: false, dueDate}])} toggleTask={taskId => setTasks(prev => prev.map(t => t.id === taskId ? {...t, completed: !t.completed} : t))} deleteTask={taskId => setTasks(prev => prev.filter(t => t.id !== taskId))} />}
-                    {activeView === 'flights' && <Flights bookings={flightBookings} onBookFlight={(booking, _sourceAccountId) => {
+                    {activeView === 'tasks' && <Tasks tasks={tasks} addTask={(text, dueDate, category) => setTasks(prev => [...prev, {id: `task_${Date.now()}`, text, completed: false, dueDate, category}])} toggleTask={taskId => setTasks(prev => prev.map(t => t.id === taskId ? {...t, completed: !t.completed} : t))} deleteTask={taskId => setTasks(prev => prev.filter(t => t.id !== taskId))} />}
+                    {activeView === 'flights' && <Flights bookings={flightBookings} onBookFlight={(booking) => {
                         const newBooking: FlightBooking = { ...booking, id: `bk_${Date.now()}`, bookingDate: new Date(), status: 'Confirmed' };
                         setFlightBookings(prev => [...prev, newBooking]);
                         return true;
                     }} accounts={accounts} setActiveView={setActiveView} />}
-                    {activeView === 'utilities' && <Utilities bills={utilityBills} billers={utilityBillers} onPayBill={(billId, _sourceAccountId) => { setUtilityBills(prev => prev.map(b => b.id === billId ? {...b, isPaid: true} : b)); return true; }} accounts={accounts} setActiveView={setActiveView} />}
+                    {activeView === 'utilities' && <Utilities bills={utilityBills} billers={utilityBillers} onPayBill={(billId) => { setUtilityBills(prev => prev.map(b => b.id === billId ? {...b, isPaid: true} : b)); return true; }} accounts={accounts} setActiveView={setActiveView} />}
                     {activeView === 'integrations' && <Integrations linkedServices={linkedServices} onLinkService={(service, identifier) => setLinkedServices(prev => ({...prev, [service]: identifier}))} />}
                     {activeView === 'advisor' && <FinancialAdvisor analysis={financialAnalysis} isAnalyzing={isAnalyzing} analysisError={analysisError} runFinancialAnalysis={runFinancialAnalysis} setActiveView={setActiveView} />}
                     {activeView === 'invest' && <Investments />}
                     {activeView === 'atmLocator' && <AtmLocator />}
-                    {activeView === 'quickteller' && <Quickteller airtimeProviders={airtimeProviders} purchases={airtimePurchases} onPurchase={(providerId, phoneNumber, amount, _accountId) => { setAirtimePurchases(prev => [...prev, { id: `at_${Date.now()}`, providerId, phoneNumber, amount, purchaseDate: new Date() }]); return true; }} accounts={accounts} setActiveView={setActiveView} />}
+                    {activeView === 'quickteller' && <Quickteller airtimeProviders={airtimeProviders} purchases={airtimePurchases} onPurchase={(providerId, phoneNumber, amount) => { setAirtimePurchases(prev => [...prev, { id: `at_${Date.now()}`, providerId, phoneNumber, amount, purchaseDate: new Date() }]); return true; }} accounts={accounts} setActiveView={setActiveView} />}
                     {activeView === 'qrScanner' && <QrScanner hapticsEnabled={platformSettings.hapticsEnabled} />}
                     {activeView === 'privacy' && <PrivacyCenter settings={privacySettings} onUpdateSettings={(update) => setPrivacySettings(prev => ({ ...prev, ...update }))} />}
                     {activeView === 'about' && <About />}

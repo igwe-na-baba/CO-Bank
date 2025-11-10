@@ -194,7 +194,7 @@ const SpendingSummary: React.FC<{ transactions: CardTransaction[] }> = ({ transa
 };
 
 
-export const CardManagement: React.FC<CardManagementProps> = ({ cards, virtualCards, onUpdateVirtualCard, cardTransactions, onUpdateCardControls, onAddCard, onAddVirtualCard, accountBalance: _accountBalance, onAddFunds }) => {
+export const CardManagement: React.FC<CardManagementProps> = ({ cards, virtualCards, onUpdateVirtualCard, cardTransactions, onUpdateCardControls, onAddCard, onAddVirtualCard, onAddFunds }) => {
     const [currentCardIndex, setCurrentCardIndex] = useState(0);
     const [viewingCard, setViewingCard] = useState<Card | VirtualCard | null>(null);
     const [isAddFundsModalOpen, setIsAddFundsModalOpen] = useState(false);
@@ -227,7 +227,7 @@ export const CardManagement: React.FC<CardManagementProps> = ({ cards, virtualCa
                         <div className="relative">
                             <div className="overflow-hidden">
                                 <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentCardIndex * 100}%)`}}>
-                                    {allCards.map((card) => (
+                                    {allCards.map((card, _index) => (
                                         <div key={card ? card.id : 'add-card'} className="w-full flex-shrink-0">
                                             {card ? <CardVisual card={card} /> : <AddCardPlaceholder onClick={() => setIsAddCardModalOpen(true)} />}
                                         </div>

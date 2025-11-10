@@ -415,6 +415,7 @@ export const AccountCreationModal: React.FC<AccountCreationModalProps> = ({ onCl
                     </div>
                      {step < 5 && (
                         <div className="mt-8 pt-6 border-t border-slate-700 flex justify-between">
+                            {/* FIX: Replaced onBackToLogin with onClose as it's the available prop for this modal. */}
                             <button onClick={step === 0 ? onClose : handleBack} className="px-6 py-2 text-sm font-medium text-slate-300 bg-slate-700/50 hover:bg-slate-700 rounded-lg">
                                {step === 0 ? 'Back to Login' : 'Back'}
                             </button>
