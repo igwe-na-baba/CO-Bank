@@ -10,7 +10,7 @@ interface State {
 }
 
 export class ErrorBoundary extends React.Component<Props, State> {
-  // FIX: Replaced state class property with a constructor to explicitly initialize `this.props` and `this.state`, resolving the TypeScript error where `props` was not found on the class type.
+  // FIX: Added a constructor to properly initialize state and props for this class component. This resolves errors where `this.state` and `this.props` were accessed before being assigned.
   constructor(props: Props) {
     super(props);
     this.state = { hasError: false };
