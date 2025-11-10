@@ -1,4 +1,4 @@
-import { Country, Recipient, Transaction, TransactionStatus, Card, CardTransaction, AdvancedTransferLimits, Account, AccountType, CryptoAsset, CryptoHolding, SubscriptionService, SubscriptionServiceType, AppleCardDetails, AppleCardTransaction, SpendingCategory, TravelPlan, TravelPlanStatus, SecuritySettings, TrustedDevice, UserProfile, PlatformSettings, PlatformTheme, Task, Airport, FlightBooking, UtilityBiller, UtilityBill, UtilityType, AtmLocation, AirtimeProvider, AirtimePurchase, PushNotificationSettings, VirtualCard, FaqItem, LeadershipProfile, View, WalletDetails, WalletTransaction, CustomerReview, StaffProfile, Cause } from './types';
+import { Country, Recipient, Transaction, TransactionStatus, Card, CardTransaction, AdvancedTransferLimits, Account, AccountType, CryptoAsset, CryptoHolding, SubscriptionService, SubscriptionServiceType, AppleCardDetails, AppleCardTransaction, SpendingCategory, TravelPlan, TravelPlanStatus, SecuritySettings, TrustedDevice, UserProfile, PlatformSettings, PlatformTheme, Task, TaskCategory, Airport, FlightBooking, UtilityBiller, UtilityBill, UtilityType, AtmLocation, AirtimeProvider, AirtimePurchase, PushNotificationSettings, VirtualCard, FaqItem, LeadershipProfile, View, WalletDetails, WalletTransaction, CustomerReview, StaffProfile, Cause } from './types';
 
 export const ALL_COUNTRIES: Country[] = [
     { code: 'US', name: 'United States', currency: 'USD', symbol: '$' },
@@ -867,11 +867,13 @@ export const THEME_COLORS: { [key in PlatformTheme]: { [key: string]: string } }
 };
 
 // --- Tasks ---
+export const TASK_CATEGORIES: TaskCategory[] = ['Financial', 'Personal', 'Work', 'Other'];
+
 const getFutureDate = (days: number) => new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 export const INITIAL_TASKS: Task[] = [
-    { id: 'task1', text: 'Review Q2 business expenses', completed: false, dueDate: getFutureDate(3) },
-    { id: 'task2', text: 'Set up automatic savings transfer', completed: true },
-    { id: 'task3', text: 'Pay credit card bill', completed: false, dueDate: getFutureDate(0) },
+    { id: 'task1', text: 'Review Q2 business expenses', completed: false, dueDate: getFutureDate(3), category: 'Work' },
+    { id: 'task2', text: 'Set up automatic savings transfer', completed: true, category: 'Financial' },
+    { id: 'task3', text: 'Pay credit card bill', completed: false, dueDate: getFutureDate(0), category: 'Financial' },
 ];
 
 // --- Flights ---

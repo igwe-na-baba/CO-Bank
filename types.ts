@@ -445,12 +445,15 @@ export interface PlatformSettings {
 }
 
 // Task Management
+export type TaskCategory = 'Financial' | 'Personal' | 'Work' | 'Other';
+
 export interface Task {
   id: string;
   text: string;
   completed: boolean;
   dueDate?: Date;
   notificationSent?: boolean;
+  category?: TaskCategory;
 }
 
 // Flight Booking

@@ -20,9 +20,10 @@ export const TransactionTracker: React.FC<TransactionTrackerProps> = ({ transact
     { status: TransactionStatus.FUNDS_ARRIVED, label: 'Funds Delivered', icon: <BankIcon className="w-6 h-6" /> },
   ];
   
-  // Filter steps to only include those relevant to this specific transaction's history
+  // FIX: Removed unnecessary `as any` type assertion for better type safety.
+  // The `step.status` is of type `TransactionStatus`, which can be used to index `statusTimestamps`.
   const steps = allPossibleSteps.filter(step => 
-      step.status === status || (statusTimestamps as any)[step.status]
+      step.status === status || statusTimestamps[step.status]
   );
 
   const currentStepIndex = steps.findIndex(s => s.status === status);

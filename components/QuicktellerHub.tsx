@@ -42,37 +42,37 @@ export const QuicktellerHub: React.FC<QuicktellerHubProps> = ({ setActiveView, o
         {
             title: t('quick_actions_send_money'),
             icon: <ArrowsRightLeftIcon className="w-10 h-10 text-primary-300" />,
-            bgImage: 'https://images.unsplash.com/photo-1584223214223-c6b7b0551065?q=80&w=2849&auto=format&fit=crop',
+            bgImage: 'https://images.unsplash.com/photo-1639755294951-54117c2a5247?q=80&w=2832&auto=format&fit=crop',
             onClick: () => onOpenSendMoneyFlow('send'),
         },
         {
             title: t('quick_actions_pay_bills'),
             icon: <CurrencyDollarIcon className="w-10 h-10 text-primary-300" />,
-            bgImage: 'https://images.unsplash.com/photo-1633409361618-c167c13a5a78?q=80&w=2940&auto=format&fit=crop',
+            bgImage: 'https://images.unsplash.com/photo-1554224155-1696413565d3?q=80&w=2940&auto=format&fit=crop',
             onClick: () => setActiveView('utilities'),
         },
         {
             title: t('quick_actions_buy_airtime'),
             icon: <DevicePhoneMobileIcon className="w-10 h-10 text-primary-300" />,
-            bgImage: 'https://images.unsplash.com/photo-1517420704952-d9f39e95b412?q=80&w=2838&auto=format&fit=crop',
+            bgImage: 'https://images.unsplash.com/photo-1604799321304-23986835691c?q=80&w=2874&auto=format&fit=crop',
             onClick: () => setActiveView('quickteller'),
         },
         {
             title: t('quick_actions_scan_to_pay'),
             icon: <QrCodeIcon className="w-10 h-10 text-primary-300" />,
-            bgImage: 'https://images.unsplash.com/photo-1605377222485-83c34794e773?q=80&w=2824&auto=format&fit=crop',
+            bgImage: 'https://images.unsplash.com/photo-1588196749107-1a71a9953488?q=80&w=2942&auto=format&fit=crop',
             onClick: () => setActiveView('qrScanner'),
         },
         {
             title: t('quick_actions_deposit_check'),
             icon: <CameraIcon className="w-10 h-10 text-primary-300" />,
-            bgImage: 'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=2940&auto=format&fit=crop',
+            bgImage: 'https://images.unsplash.com/photo-1584433323048-8424070a25b3?q=80&w=2940&auto=format&fit=crop',
             onClick: () => onOpenSendMoneyFlow('deposit'),
         },
         {
             title: t('quick_actions_find_atm'),
             icon: <MapPinIcon className="w-10 h-10 text-primary-300" />,
-            bgImage: 'https://images.unsplash.com/photo-1598349942360-15339d19a489?q=80&w=2808&auto=format&fit=crop',
+            bgImage: 'https://images.unsplash.com/photo-1579226922377-6c3123253572?q=80&w=2788&auto=format&fit=crop',
             onClick: () => setActiveView('atmLocator'),
         }
     ];

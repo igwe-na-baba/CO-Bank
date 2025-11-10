@@ -26,7 +26,7 @@ export const translateWithGemini = async (text: string, targetLanguage: string):
             model: 'gemini-2.5-flash',
             contents: `Translate the following text to ${targetLanguage}. Return only the translated text, without any additional formatting or explanations. Text to translate: "${text}"`,
         });
-        // FIX: Removed optional chaining from response.text as it is not nullable.
+        // FIX: Removed optional chaining from response.text as it is not nullable according to Gemini API guidelines.
         return { translatedText: response.text.trim(), isError: false };
     } catch (error) {
         // FIX: Cast error to any to prevent potential type errors with console.error and maintain consistency.
@@ -75,7 +75,6 @@ export const getCountryBankingTip = async (countryName: string): Promise<Banking
       }
     });
     
-    // FIX: Removed optional chaining as `text` is guaranteed on a successful response.
     const responseText = response.text;
     if (!responseText || responseText.trim() === '') {
         throw new Error('Received empty or invalid response from Gemini API.');
@@ -145,7 +144,6 @@ export const getFinancialNews = async (): Promise<FinancialNewsResult> => {
       }
     });
     
-    // FIX: Removed optional chaining as `text` is guaranteed on a successful response.
     const responseText = response.text;
     if (!responseText || responseText.trim() === '') {
         throw new Error('Received empty or invalid response from Gemini API.');
@@ -199,7 +197,6 @@ export const getInsuranceProductDetails = async (productName: string): Promise<{
       }
     });
     
-    // FIX: Removed optional chaining as `text` is guaranteed on a successful response.
     const responseText = response.text;
     if (!responseText || responseText.trim() === '') {
         throw new Error('Received empty or invalid response from Gemini API.');
@@ -217,7 +214,6 @@ export const getInsuranceProductDetails = async (productName: string): Promise<{
   }
 };
 
-// FIX: Add missing getFinancialAnalysis function.
 export const getFinancialAnalysis = async (financialDataJSON: string): Promise<{ analysis: AdvisorResponse | null, isError: boolean }> => {
   if (!ai) {
     return { analysis: null, isError: true };
@@ -274,7 +270,6 @@ export const getFinancialAnalysis = async (financialDataJSON: string): Promise<{
   }
 };
 
-// FIX: Add missing getLoanProducts function.
 export const getLoanProducts = async (): Promise<{ products: LoanProduct[], isError: boolean }> => {
   if (!ai) {
     const fallbackProducts: LoanProduct[] = [
@@ -330,7 +325,6 @@ export const getLoanProducts = async (): Promise<{ products: LoanProduct[], isEr
   }
 };
 
-// FIX: Add missing getSystemUpdates function.
 export const getSystemUpdates = async (): Promise<{ updates: SystemUpdate[], isError: boolean }> => {
   if (!ai) {
     const fallback: SystemUpdate[] = [
@@ -379,7 +373,6 @@ export const getSystemUpdates = async (): Promise<{ updates: SystemUpdate[], isE
   }
 };
 
-// FIX: Add missing getSupportAnswer function.
 export const getSupportAnswer = async (query: string): Promise<{ answer: string, isError: boolean }> => {
   if (!ai) {
     return { answer: "Our AI assistant is currently offline. Please check back later.", isError: true };
@@ -405,7 +398,6 @@ export const getSupportAnswer = async (query: string): Promise<{ answer: string,
   }
 };
 
-// FIX: Add missing getAccountPerks function.
 export const getAccountPerks = async (accountType: AccountType, verificationLevel: VerificationLevel): Promise<{ perks: string[], isError: boolean }> => {
     if (!ai) {
         return { perks: ["Enhanced fraud monitoring.", "Priority customer support."], isError: false };
@@ -442,7 +434,6 @@ export const getAccountPerks = async (accountType: AccountType, verificationLeve
     }
 };
 
-// FIX: Add missing getCauseDetails function.
 export const getCauseDetails = async (causeTitle: string): Promise<{ details: Cause['details'] | null; isError: boolean; }> => {
   if (!ai) {
     return { details: { description: 'Provides essential aid and relief to those in need, focusing on immediate impact.', impacts: ['$25 provides a family with clean water for a week.', '$100 supplies a classroom with essential learning materials.'] }, isError: false };

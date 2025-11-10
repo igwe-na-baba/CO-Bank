@@ -194,21 +194,21 @@ const ExploreServices: React.FC<{ setActiveView: (view: View) => void }> = ({ se
             description: 'Plan your next trip and pay directly.',
             icon: <AirplaneTicketIcon className="w-10 h-10 text-primary-300" />,
             view: 'flights' as View,
-            bgImage: 'https://images.unsplash.com/photo-1570715725737-cfc8189c5689?q=80&w=2832&auto=format&fit=crop'
+            bgImage: 'https://images.unsplash.com/photo-1569154941061-e231b4725ef1?q=80&w=2832&auto=format&fit=crop'
         },
         {
             title: 'Trade Crypto',
             description: 'Buy, sell, and hold digital assets securely.',
             icon: <ChartBarIcon className="w-10 h-10 text-primary-300" />,
             view: 'crypto' as View,
-            bgImage: 'https://images.unsplash.com/photo-1642155533814-64b09e133857?q=80&w=2832&auto=format&fit=crop'
+            bgImage: 'https://images.unsplash.com/photo-1621452773453-c82736159b3a?q=80&w=2940&auto=format&fit=crop'
         },
         {
             title: 'Secure Services',
             description: 'Protect your transfers, travel, and more.',
             icon: <LifebuoyIcon className="w-10 h-10 text-primary-300" />,
             view: 'insurance' as View,
-            bgImage: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2940&auto=format&fit=crop'
+            bgImage: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2940&auto=format&fit=crop'
         }
     ];
 

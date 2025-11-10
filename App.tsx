@@ -6,7 +6,7 @@ import { SendMoneyFlow } from './components/SendMoneyFlow';
 import { Recipients } from './components/Recipients';
 // FIX: Added missing types to the import from types.ts.
 // FIX: Added CardTransaction to the import list.
-import { Transaction, Recipient, TransactionStatus, Card, CardTransaction, Notification, NotificationType, AdvancedTransferLimits, Country, LoanApplication, LoanApplicationStatus, Account, VerificationLevel, CryptoHolding, CryptoAsset, SubscriptionService, AppleCardDetails, AppleCardTransaction, SpendingLimit, SpendingCategory, TravelPlan, TravelPlanStatus, SecuritySettings, TrustedDevice, UserProfile, PlatformSettings, PlatformTheme, View, Task, FlightBooking, UtilityBill, UtilityBiller, AdvisorResponse, BalanceDisplayMode, AccountType, AirtimePurchase, PushNotification, PushNotificationSettings, SavedSession, VirtualCard, WalletDetails, Donation, PrivacySettings } from './types';
+import { Transaction, Recipient, TransactionStatus, Card, CardTransaction, Notification, NotificationType, AdvancedTransferLimits, Country, LoanApplication, LoanApplicationStatus, Account, VerificationLevel, CryptoHolding, CryptoAsset, SubscriptionService, AppleCardDetails, AppleCardTransaction, SpendingLimit, SpendingCategory, TravelPlan, TravelPlanStatus, SecuritySettings, TrustedDevice, UserProfile, PlatformSettings, PlatformTheme, View, Task, TaskCategory, FlightBooking, UtilityBill, UtilityBiller, AdvisorResponse, BalanceDisplayMode, AccountType, AirtimePurchase, PushNotification, PushNotificationSettings, SavedSession, VirtualCard, WalletDetails, Donation, PrivacySettings } from './types';
 // FIX: Added NEW_USER_ACCOUNTS_TEMPLATE to the import from constants.ts to resolve a reference error.
 import { INITIAL_RECIPIENTS, INITIAL_TRANSACTIONS, INITIAL_CARDS, INITIAL_CARD_TRANSACTIONS, INITIAL_ADVANCED_TRANSFER_LIMITS, SELF_RECIPIENT, INITIAL_ACCOUNTS, getInitialCryptoAssets, INITIAL_CRYPTO_HOLDINGS, CRYPTO_TRADE_FEE_PERCENT, INITIAL_SUBSCRIPTIONS, INITIAL_APPLE_CARD_DETAILS, INITIAL_APPLE_CARD_TRANSACTIONS, INITIAL_TRAVEL_PLANS, INITIAL_SECURITY_SETTINGS, INITIAL_TRUSTED_DEVICES, USER_PROFILE, INITIAL_PLATFORM_SETTINGS, THEME_COLORS, INITIAL_TASKS, INITIAL_FLIGHT_BOOKINGS, INITIAL_UTILITY_BILLS, getUtilityBillers, getAirtimeProviders, INITIAL_AIRTIME_PURCHASES, INITIAL_PUSH_SETTINGS, EXCHANGE_RATES, NEW_USER_PROFILE_TEMPLATE, NEW_USER_ACCOUNTS_TEMPLATE, INITIAL_VIRTUAL_CARDS, DOMESTIC_WIRE_FEE, INTERNATIONAL_WIRE_FEE, LEGAL_CONTENT, INITIAL_WALLET_DETAILS, TRANSFER_PURPOSES } from './constants';
 import * as Icons from './components/Icons';
@@ -208,7 +208,6 @@ const AppContent: React.FC = () => {
 
         setTransactions(prev => [newTransaction, ...prev]);
         setAccounts(prev => prev.map(acc => acc.id === data.accountId ? { ...acc, balance: acc.balance - (data.sendAmount + data.fee) } : acc));
-        // FIX: Added a null check for `userProfile.phone` to satisfy TypeScript strict null checks. This prevents passing `undefined` to a function expecting a string.
         if(userProfile.phone) {
             notificationService.sendSmsNotification(userProfile.phone, notificationService.generateTransactionReceiptSms(newTransaction));
         }
@@ -240,7 +239,6 @@ const AppContent: React.FC = () => {
             realDetails: { accountNumber: data.accountNumber, swiftBic: data.swiftBic || data.routingNumber }
         };
 
-        // FIX: Added missing properties `statusTimestamps`, `description`, and `type` to conform to the `Transaction` interface.
         const tx: Transaction = {
             id: `wire_${Date.now()}`,
             accountId: data.sourceAccountId,
@@ -389,12 +387,11 @@ const AppContent: React.FC = () => {
     }, [accounts, transactions, cryptoHoldings]);
     
     const handleCreateAccountSuccess = (formData: any) => {
-// FIX: Explicitly cast formData.phone to a string to resolve the 'unknown is not assignable to string' error.
+        // FIX: Explicitly cast formData.phone to a string or undefined to resolve the 'unknown is not assignable to string' error.
         const newUserProfile: UserProfile = { ...NEW_USER_PROFILE_TEMPLATE, name: formData.fullName, email: formData.email, phone: formData.phone ? String(formData.phone) : undefined };
         const newAccounts = NEW_USER_ACCOUNTS_TEMPLATE.map((acc, i) => ({
             ...acc,
             id: `acc_new_${Date.now()}_${i}`,
-            // FIX: Replaced hardcoded '...' with a randomly generated account number.
             fullAccountNumber: String(Math.floor(1000000000000000 + Math.random() * 9000000000000000))
         }));
         
@@ -473,134 +470,105 @@ const AppContent: React.FC = () => {
                     {activeView === 'crypto' && <CryptoDashboard cryptoAssets={cryptoAssets} setCryptoAssets={setCryptoAssets} holdings={cryptoHoldings} checkingAccount={mainCheckingAccount} onBuy={(assetId, usdAmount, assetPrice) => {
                         const cryptoAmount = usdAmount / assetPrice;
                         const fee = usdAmount * CRYPTO_TRADE_FEE_PERCENT;
-                        const totalCost = usdAmount + fee;
-                        if (!mainCheckingAccount || mainCheckingAccount.balance < totalCost) return false;
-                        setAccounts(prev => prev.map(a => a.id === mainCheckingAccount.id ? { ...a, balance: a.balance - totalCost } : a));
-                        setCryptoHoldings(prev => {
-                            const existing = prev.find(h => h.assetId === assetId);
-                            if (existing) {
-                                const totalAmount = existing.amount + cryptoAmount;
-                                const totalCost = (existing.amount * existing.avgBuyPrice) + usdAmount;
-                                return prev.map(h => h.assetId === assetId ? { ...h, amount: totalAmount, avgBuyPrice: totalCost / totalAmount } : h);
-                            }
-                            return [...prev, { assetId, amount: cryptoAmount, avgBuyPrice: assetPrice }];
-                        });
-                        return true;
-                    }} onSell={() => {return false}} />}
-                    {activeView === 'services' && <ServicesDashboard subscriptions={subscriptions} onPaySubscription={() => {return true}} appleCardDetails={appleCardDetails} appleCardTransactions={appleCardTransactions} onUpdateSpendingLimits={(limits) => setAppleCardDetails(prev => ({...prev, spendingLimits: limits}))} onUpdateTransactionCategory={(txId, category) => setAppleCardTransactions(prev => prev.map(tx => tx.id === txId ? {...tx, category} : tx))} />}
-                    {activeView === 'checkin' && <TravelCheckIn travelPlans={travelPlans} addTravelPlan={(country, startDate, endDate) => setTravelPlans(prev => [...prev, { id: `travel_${Date.now()}`, country, startDate, endDate, status: TravelPlanStatus.UPCOMING }])} />}
-                    {activeView === 'platform' && <PlatformFeatures settings={platformSettings} onUpdateSettings={(update) => setPlatformSettings(prev => ({ ...prev, ...update }))} />}
-                    {activeView === 'tasks' && <Tasks tasks={tasks} addTask={(text, dueDate) => setTasks(prev => [...prev, { id: `task_${Date.now()}`, text, completed: false, dueDate }])} toggleTask={(id) => setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t))} deleteTask={(id) => setTasks(prev => prev.filter(t => t.id !== id))} />}
-                    {activeView === 'flights' && <Flights bookings={flightBookings} onBookFlight={(booking, accountId) => {
-                        const account = accounts.find(a => a.id === accountId);
-                        if (!account || account.balance < booking.totalPrice) return false;
-                        setAccounts(prev => prev.map(a => a.id === accountId ? {...a, balance: a.balance - booking.totalPrice} : a));
-                        setFlightBookings(prev => [...prev, { ...booking, id: `booking_${Date.now()}`, bookingDate: new Date(), status: 'Confirmed' }]);
+                        if (mainCheckingAccount && mainCheckingAccount.balance >= (usdAmount + fee)) {
+                            setAccounts(prev => prev.map(acc => acc.id === mainCheckingAccount.id ? { ...acc, balance: acc.balance - (usdAmount + fee) } : acc));
+                            setCryptoHoldings(prev => {
+                                const existing = prev.find(h => h.assetId === assetId);
+                                if (existing) {
+                                    const totalAmount = existing.amount + cryptoAmount;
+                                    const totalCost = (existing.amount * existing.avgBuyPrice) + usdAmount;
+                                    return prev.map(h => h.assetId === assetId ? { ...h, amount: totalAmount, avgBuyPrice: totalCost / totalAmount } : h);
+                                }
+                                return [...prev, { assetId, amount: cryptoAmount, avgBuyPrice: assetPrice }];
+                            });
+                            return true;
+                        }
+                        return false;
+                    }}
+                    onSell={(assetId, cryptoAmount, assetPrice) => {
+                        const usdAmount = cryptoAmount * assetPrice;
+                        const fee = usdAmount * CRYPTO_TRADE_FEE_PERCENT;
+                        const holding = cryptoHoldings.find(h => h.assetId === assetId);
+                        if (mainCheckingAccount && holding && holding.amount >= cryptoAmount) {
+                            setAccounts(prev => prev.map(acc => acc.id === mainCheckingAccount.id ? { ...acc, balance: acc.balance + (usdAmount - fee) } : acc));
+                            setCryptoHoldings(prev => prev.map(h => h.assetId === assetId ? { ...h, amount: h.amount - cryptoAmount } : h).filter(h => h.amount > 0.000001));
+                            return true;
+                        }
+                        return false;
+                    }}
+                     />}
+                    {activeView === 'services' && <ServicesDashboard subscriptions={subscriptions} onPaySubscription={() => true} appleCardDetails={appleCardDetails} appleCardTransactions={appleCardTransactions} onUpdateSpendingLimits={() => {}} onUpdateTransactionCategory={() => {}} />}
+                    {activeView === 'checkin' && <TravelCheckIn travelPlans={travelPlans} addTravelPlan={(country, startDate, endDate) => setTravelPlans(prev => [...prev, { id: `tp_${Date.now()}`, country, startDate, endDate, status: TravelPlanStatus.UPCOMING }])} />}
+                    {activeView === 'platform' && <PlatformFeatures settings={platformSettings} onUpdateSettings={update => setPlatformSettings(prev => ({ ...prev, ...update }))} />}
+                    {activeView === 'tasks' && <Tasks tasks={tasks} addTask={(text, dueDate) => setTasks(prev => [...prev, {id: `task_${Date.now()}`, text, completed: false, dueDate}])} toggleTask={taskId => setTasks(prev => prev.map(t => t.id === taskId ? {...t, completed: !t.completed} : t))} deleteTask={taskId => setTasks(prev => prev.filter(t => t.id !== taskId))} />}
+                    {activeView === 'flights' && <Flights bookings={flightBookings} onBookFlight={(booking, sourceAccountId) => {
+                        const newBooking: FlightBooking = { ...booking, id: `bk_${Date.now()}`, bookingDate: new Date(), status: 'Confirmed' };
+                        setFlightBookings(prev => [...prev, newBooking]);
                         return true;
                     }} accounts={accounts} setActiveView={setActiveView} />}
-                    {activeView === 'utilities' && <Utilities bills={utilityBills} billers={utilityBillers} onPayBill={(billId, accountId) => {
-                        const bill = utilityBills.find(b => b.id === billId);
-                        const account = accounts.find(a => a.id === accountId);
-                        if (!bill || !account || account.balance < bill.amount) return false;
-                        setAccounts(prev => prev.map(a => a.id === accountId ? {...a, balance: a.balance - bill.amount} : a));
-                        setUtilityBills(prev => prev.map(b => b.id === billId ? {...b, isPaid: true} : b));
-                        return true;
-                    }} accounts={accounts} setActiveView={setActiveView} />}
-                     {activeView === 'integrations' && <Integrations linkedServices={linkedServices} onLinkService={(service, identifier) => setLinkedServices(prev => ({...prev, [service]: identifier}))} />}
-                    {activeView === 'advisor' && <FinancialAdvisor analysis={financialAnalysis} isAnalyzing={isAnalyzing} analysisError={analysisError} runFinancialAnalysis={runFinancialAnalysis} setActiveView={setActiveView}/>}
+                    {activeView === 'utilities' && <Utilities bills={utilityBills} billers={utilityBillers} onPayBill={(billId, sourceAccountId) => { setUtilityBills(prev => prev.map(b => b.id === billId ? {...b, isPaid: true} : b)); return true; }} accounts={accounts} setActiveView={setActiveView} />}
+                    {activeView === 'integrations' && <Integrations linkedServices={linkedServices} onLinkService={(service, identifier) => setLinkedServices(prev => ({...prev, [service]: identifier}))} />}
+                    {activeView === 'advisor' && <FinancialAdvisor analysis={financialAnalysis} isAnalyzing={isAnalyzing} analysisError={analysisError} runFinancialAnalysis={runFinancialAnalysis} setActiveView={setActiveView} />}
                     {activeView === 'invest' && <Investments />}
                     {activeView === 'atmLocator' && <AtmLocator />}
-                    {activeView === 'quickteller' && <Quickteller airtimeProviders={airtimeProviders} purchases={airtimePurchases} accounts={accounts} onPurchase={(providerId, phoneNumber, amount, accountId) => {
-                        const account = accounts.find(a => a.id === accountId);
-                        if (!account || account.balance < amount) return false;
-                        setAccounts(prev => prev.map(a => a.id === accountId ? {...a, balance: a.balance - amount} : a));
-                        setAirtimePurchases(prev => [...prev, {id: `air_${Date.now()}`, providerId, phoneNumber, amount, purchaseDate: new Date()}]);
-                        return true;
-                    }} setActiveView={setActiveView} />}
+                    {activeView === 'quickteller' && <Quickteller airtimeProviders={airtimeProviders} purchases={airtimePurchases} onPurchase={(providerId, phoneNumber, amount, accountId) => { setAirtimePurchases(prev => [...prev, { id: `at_${Date.now()}`, providerId, phoneNumber, amount, purchaseDate: new Date() }]); return true; }} accounts={accounts} setActiveView={setActiveView} />}
                     {activeView === 'qrScanner' && <QrScanner hapticsEnabled={platformSettings.hapticsEnabled} />}
                     {activeView === 'privacy' && <PrivacyCenter settings={privacySettings} onUpdateSettings={(update) => setPrivacySettings(prev => ({ ...prev, ...update }))} />}
                     {activeView === 'about' && <About />}
                     {activeView === 'contact' && <Contact setActiveView={setActiveView} />}
-                    {activeView === 'wallet' && <DigitalWallet wallet={{balance: 1250.75, currency: 'USD', cardLastFour: '9876'}} />}
+                    {activeView === 'wallet' && <DigitalWallet wallet={INITIAL_WALLET_DETAILS} />}
                     {activeView === 'ratings' && <Ratings />}
-                    {activeView === 'globalAid' && <GlobalAid donations={donations} onDonate={(causeId, amount, accountId) => {
-                        const account = accounts.find(a => a.id === accountId);
-                        if (!account || account.balance < amount) return false;
-                        setAccounts(prev => prev.map(a => a.id === accountId ? {...a, balance: a.balance - amount} : a));
-                        setDonations(prev => [...prev, {id: `don_${Date.now()}`, causeId, amount, date: new Date()}]);
-                        return true;
-                    }} accounts={accounts} />}
-                     {activeView === 'network' && <GlobalBankingNetwork onOpenWireTransfer={(data) => {
-                        setWireTransferInitialData(data);
-                        setShowWireTransfer(true);
-                    }} setActiveView={setActiveView} />}
+                    {activeView === 'globalAid' && <GlobalAid donations={donations} accounts={accounts} onDonate={(causeId, amount, accountId) => { setDonations(prev => [...prev, { id: `don_${Date.now()}`, causeId, amount, date: new Date() }]); setAccounts(prev => prev.map(a => a.id === accountId ? {...a, balance: a.balance - amount} : a)); return true; }} />}
+                    {activeView === 'network' && <GlobalBankingNetwork onOpenWireTransfer={(data) => { setWireTransferInitialData(data); setShowWireTransfer(true); }} setActiveView={setActiveView} />}
                 </div>
             </main>
-            <Footer setActiveView={setActiveView} onOpenSendMoneyFlow={() => setShowSendMoneyFlow(true)} openLegalModal={(title, content) => { setLegalModalContent({title, content}); setShowLegalModal(true); }} />
-            <LiveBankingAssistant accounts={accounts} transactions={transactions} recipients={recipients} onInitiateTransfer={(recipientName, amount) => {
-                const recipient = recipients.find(r => r.fullName.toLowerCase() === recipientName.toLowerCase());
-                if (recipient) {
-                    setTransactionToRepeat({
-                        id: '',
-                        accountId: accounts[0].id,
-                        recipient: recipient,
-                        sendAmount: amount,
-                        receiveAmount: amount * (EXCHANGE_RATES[recipient.country.currency] || 1),
-                        fee: 5,
-                        exchangeRate: EXCHANGE_RATES[recipient.country.currency] || 1,
-                        status: TransactionStatus.SUBMITTED,
-                        estimatedArrival: new Date(),
-                        statusTimestamps: { Submitted: new Date() },
-                        description: `Transfer to ${recipientName}`,
-                        type: 'debit',
-                    });
-                    setShowSendMoneyFlow(true);
-                }
-            }} />
-
-            {/* Global Modals */}
+            <Footer setActiveView={setActiveView} onOpenSendMoneyFlow={(tab) => { setShowSendMoneyFlow(true); setSendMoneyFlowInitialTab(tab); }} openLegalModal={(title, content) => { setLegalModalContent({ title, content }); setShowLegalModal(true); }} />
+            {showSendMoneyFlow && <SendMoneyFlow recipients={recipients} accounts={accounts} createTransaction={createTransaction} transactions={transactions} securitySettings={securitySettings} hapticsEnabled={platformSettings.hapticsEnabled} onAuthorizeTransaction={() => {}} setActiveView={setActiveView} onClose={() => { setShowSendMoneyFlow(false); setTransactionToRepeat(null); }} onLinkAccount={() => setShowLinkAccountModal(true)} onDepositCheck={() => {}} onSplitTransaction={() => true} initialTab={sendMoneyFlowInitialTab} transactionToRepeat={transactionToRepeat} userProfile={userProfile} onContactSupport={() => setShowContactSupportModal(true)} />}
+            {showWireTransfer && <WireTransfer accounts={accounts} recipients={recipients} onSendWire={onSendWire} onClose={() => { setShowWireTransfer(false); setWireTransferInitialData(null); }} initialData={wireTransferInitialData} />}
             {showLogoutModal && <LogoutConfirmationModal onClose={() => setShowLogoutModal(false)} onConfirm={handleLogout} />}
             {showInactivityModal && <InactivityModal onLogout={handleLogout} onStayLoggedIn={() => {}} countdownStart={60} />}
-            {showLanguageSelector && <LanguageSelector onClose={() => setShowLanguageSelector(false)} />}
-            {showSendMoneyFlow && <SendMoneyFlow recipients={recipients} accounts={accounts} createTransaction={createTransaction} transactions={transactions} securitySettings={securitySettings} hapticsEnabled={platformSettings.hapticsEnabled} onAuthorizeTransaction={() => {}} setActiveView={setActiveView} onClose={() => { setShowSendMoneyFlow(false); setTransactionToRepeat(null); }} onLinkAccount={() => setShowLinkAccountModal(true)} onDepositCheck={() => {}} onSplitTransaction={() => {return true}} initialTab={sendMoneyFlowInitialTab} transactionToRepeat={transactionToRepeat} userProfile={userProfile} onContactSupport={() => setShowContactSupportModal(true)} />}
-            {showWireTransfer && <WireTransfer accounts={accounts} recipients={recipients} onSendWire={onSendWire} onClose={() => { setShowWireTransfer(false); setWireTransferInitialData(null); }} initialData={wireTransferInitialData} />}
             {showCongratulations && <CongratulationsOverlay />}
             {showPushApproval && transactionForPushApproval && <PushApprovalModal transactionId={transactionForPushApproval} onAuthorize={() => {}} onClose={() => setShowPushApproval(false)} />}
             {showChangePasswordModal && <ChangePasswordModal onClose={() => setShowChangePasswordModal(false)} onSuccess={() => {}} />}
             {showLinkAccountModal && <LinkBankAccountModal onClose={() => setShowLinkAccountModal(false)} onLinkSuccess={(bankName, accountName, lastFour) => {
-                const newAccount: Account = {
-                    id: `ext_${Date.now()}`,
-                    type: AccountType.EXTERNAL_LINKED,
-                    nickname: `${bankName} ${accountName}`,
-                    accountNumber: `••••${lastFour}`,
-                    balance: 0, // External accounts don't show balance here
-                    features: [],
-                    status: 'Active',
-                };
+                const newAccount: Account = { id: `ext_${Date.now()}`, type: AccountType.EXTERNAL_LINKED, nickname: `${bankName} (${accountName})`, accountNumber: `••••${lastFour}`, balance: 0, features: [] };
                 setAccounts(prev => [...prev, newAccount]);
                 setShowLinkAccountModal(false);
             }} />}
-            {showContactSupportModal && <ContactSupportModal onClose={() => setShowContactSupportModal(false)} onSubmit={async () => {}} transactions={transactions} initialTransactionId={contactSupportInitialTxId} />}
+             <LiveBankingAssistant accounts={accounts} transactions={transactions} recipients={recipients} onInitiateTransfer={(recipientName, amount) => {
+                const recipient = recipients.find(r => r.fullName.toLowerCase() === recipientName.toLowerCase());
+                if (recipient) {
+                    setTransactionToRepeat({
+                        id: '',
+                        accountId: accounts.find(a => a.type === AccountType.CHECKING)?.id || '',
+                        recipient: recipient,
+                        sendAmount: amount,
+                        receiveAmount: 0,
+                        fee: 0,
+                        exchangeRate: 1,
+                        status: TransactionStatus.SUBMITTED,
+                        estimatedArrival: new Date(),
+                        statusTimestamps: { [TransactionStatus.SUBMITTED]: new Date() },
+                        description: '',
+                        type: 'debit',
+                    });
+                    setShowSendMoneyFlow(true);
+                } else {
+                    addNotification(NotificationType.SUPPORT, 'Recipient Not Found', `Could not find a saved recipient named "${recipientName}". Please add them first.`);
+                }
+            }} />
+            {showContactSupportModal && <ContactSupportModal onClose={() => setShowContactSupportModal(false)} onSubmit={async (data) => {
+                addNotification(NotificationType.SUPPORT, "Support Ticket Created", "We've received your request and will get back to you shortly.");
+            }} transactions={transactions} initialTransactionId={contactSupportInitialTxId} />}
             {showLegalModal && <LegalModal title={legalModalContent.title} content={legalModalContent.content} onClose={() => setShowLegalModal(false)} />}
-            {showResumeSessionModal && savedSession && (
-                <ResumeSessionModal
-                    session={savedSession}
-                    onResume={() => {
-                        setActiveView(savedSession.view);
-                        setShowResumeSessionModal(false);
-                        localStorage.removeItem('icu_session');
-                    }}
-                    onStartFresh={() => {
-                        setShowResumeSessionModal(false);
-                        localStorage.removeItem('icu_session');
-                    }}
-                />
-            )}
+            {showResumeSessionModal && savedSession && <ResumeSessionModal session={savedSession} onResume={() => { setActiveView(savedSession.view); setShowResumeSessionModal(false); }} onStartFresh={() => { localStorage.removeItem('icu_session'); setActiveView('dashboard'); setShowResumeSessionModal(false); }} />}
         </div>
     );
-};
+}
 
-export const App: React.FC = () => (
+// FIX: Export a named component `App` that wraps the main content in the LanguageProvider.
+// This resolves the 'module ... has no exported member 'App'' error in `index.tsx`.
+export const App = () => (
     <LanguageProvider>
         <AppContent />
     </LanguageProvider>

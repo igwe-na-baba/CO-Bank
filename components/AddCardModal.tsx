@@ -75,7 +75,7 @@ export const AddCardModal: React.FC<AddCardModalProps> = ({ onClose, onAddCard }
         setIsProcessing(true);
         setTimeout(() => {
             const lastFour = cardData.fullNumber.slice(-4);
-            // FIX: Added the required `cardType` property, defaulting to 'CREDIT'.
+            // FIX: Added the required `cardType` and `creditDetails` properties to conform to the `Card` interface, defaulting to a credit card.
             onAddCard({ ...cardData, lastFour, network: cardNetwork as 'Visa' | 'Mastercard', cardType: 'CREDIT', creditDetails: { creditLimit: 10000, currentBalance: 0, statementBalance: 0, minimumPayment: 25, paymentDueDate: new Date(), apr: 21.99 } });
             onClose();
         }, 1500);
