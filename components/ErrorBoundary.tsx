@@ -10,8 +10,11 @@ interface State {
 }
 
 export class ErrorBoundary extends React.Component<Props, State> {
-  // FIX: Replaced constructor with a class property initializer for cleaner state declaration and to resolve potential 'this' context issues.
-  state: State = { hasError: false };
+  // FIX: Reverted to constructor for state initialization to resolve "Property 'props' does not exist" error, which may be due to build environment limitations with class property syntax.
+  constructor(props: Props) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
   static getDerivedStateFromError(_: Error): State {
     // Update state so the next render will show the fallback UI.
@@ -48,7 +51,6 @@ export class ErrorBoundary extends React.Component<Props, State> {
       );
     }
 
-    // FIX: The use of 'this.props.children' is correct within the render method of a React class component. The reported error 'Property 'props' does not exist' is likely stale as the component correctly extends React.Component<Props, State>.
     return this.props.children;
   }
 }
