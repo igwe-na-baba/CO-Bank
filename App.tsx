@@ -235,9 +235,9 @@ const AppContent: React.FC = () => {
             accountId: data.sourceAccountId,
             recipient: recipient,
             sendAmount: amount,
-            receiveAmount: amount * (EXCHANGE_RATES[recipient.country.currency] || 1),
+            receiveAmount: amount * (EXCHANGE_RATES[recipient.country.currency as keyof typeof EXCHANGE_RATES] || 1),
             fee: fee,
-            exchangeRate: EXCHANGE_RATES[recipient.country.currency] || 1,
+            exchangeRate: EXCHANGE_RATES[recipient.country.currency as keyof typeof EXCHANGE_RATES] || 1,
             status: TransactionStatus.SUBMITTED,
             estimatedArrival: new Date(Date.now() + 86400000 * 5),
             transferMethod: 'wire',
@@ -465,7 +465,7 @@ const AppContent: React.FC = () => {
             case 'network': return <GlobalBankingNetwork onOpenWireTransfer={(data) => { setWireTransferInitialData(data); setShowWireTransfer(true); }} setActiveView={setActiveView} />;
             default: return <div>Not implemented</div>;
         }
-    }, [activeView, accounts, transactions, recipients, createTransaction, cryptoPortfolioValue, portfolioChange24h, travelPlans, totalNetWorth, balanceDisplayMode, userProfile, cards, cardTransactions, loanApplications, cryptoAssets, cryptoHoldings, subscriptions, appleCardDetails, appleCardTransactions, securitySettings, trustedDevices, platformSettings, tasks, flightBookings, utilityBills, utilityBillers, airtimeProviders, airtimePurchases, addNotification, financialAnalysis, isAnalyzing, analysisError, runFinancialAnalysis, pushNotificationSettings, privacySettings, verificationLevel, donations, linkedServices, virtualCards]);
+    }, [activeView, accounts, transactions, recipients, createTransaction, cryptoPortfolioValue, portfolioChange24h, travelPlans, totalNetWorth, balanceDisplayMode, userProfile, cards, cardTransactions, loanApplications, cryptoAssets, cryptoHoldings, subscriptions, appleCardDetails, appleCardTransactions, securitySettings, trustedDevices, platformSettings, tasks, flightBookings, utilityBills, utilityBillers, airtimeProviders, airtimePurchases, addNotification, financialAnalysis, isAnalyzing, analysisError, runFinancialAnalysis, pushNotificationSettings, privacySettings, verificationLevel, donations, linkedServices, virtualCards, handleAuthorizeTransaction]);
 
     if (showAdvancedFirstPage) {
         return <AdvancedFirstPage onComplete={() => setShowAdvancedFirstPage(false)} />;
